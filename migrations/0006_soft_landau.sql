@@ -1,0 +1,23 @@
+CREATE TABLE "products" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"product_name" varchar(100) NOT NULL,
+	"image_url" varchar(255) NOT NULL,
+	"description" varchar(255),
+	"product_target" varchar(255) NOT NULL,
+	"price" numeric(10, 2) NOT NULL,
+	"discount_price" numeric(10, 2),
+	"stock" integer DEFAULT 0,
+	"sku" varchar(50) NOT NULL,
+	"category" varchar(100),
+	"tags" varchar(255),
+	"weight" numeric(10, 2),
+	"dimensions" varchar(100),
+	"rating" numeric(2, 1) DEFAULT 0,
+	"review_count" integer DEFAULT 0,
+	"is_active" boolean DEFAULT true,
+	"related_products" jsonb,
+	"variants" jsonb,
+	"created_at" timestamp with time zone DEFAULT now(),
+	CONSTRAINT "products_id_unique" UNIQUE("id"),
+	CONSTRAINT "products_sku_unique" UNIQUE("sku")
+);

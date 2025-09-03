@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1755025538206,
+      "tag": "0000_remarkable_richard_fisk",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755067629018,
+      "tag": "0001_motionless_trish_tilby",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755092470055,
+      "tag": "0002_youthful_sally_floyd",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1755247886792,
+      "tag": "0003_empty_sauron",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1755251323217,
+      "tag": "0004_wakeful_jean_grey",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1755268782162,
+      "tag": "0005_lumpy_avengers",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1755708283203,
+      "tag": "0006_soft_landau",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1756194264807,
+      "tag": "0007_icy_gorilla_man",
+      "breakpoints": true
+    }
+  ]
+}
