@@ -71,6 +71,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
 
     useEffect(() => {
         if (productToEdit) {
+            // Editing existing product → prefill values
             form.reset({
                 id: productToEdit.id,
                 productName: productToEdit.productName,
@@ -91,9 +92,32 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                 relatedProducts: productToEdit.relatedProducts,
                 variants: productToEdit.variants,
             });
-
+        } else {
+            // Creating new product → reset to empty defaults
+            form.reset({
+                id: "",
+                productName: "",
+                imageUrl: "",
+                description: "",
+                productTarget: "",
+                price: "" as any,          // 👈 depends if your zod schema expects string or number
+                discountPrice: null,
+                stock: 0,
+                sku: "",
+                category: "",
+                tags: "",
+                weight: null,
+                dimensions: "",
+                rating: 0,
+                reviewCount: 0,
+                isActive: true,
+                relatedProducts: [],
+                variants: [],
+            });
+            setSelectedImage(null); // also clear selected image
         }
     }, [productToEdit, form]);
+
 
     const submitProduct = async (values: z.infer<typeof productValidation>) => {
         // 🔹 Ensure image exists
@@ -168,7 +192,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
         <div className=' w-full'>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submitProduct)} className="space-y-6 w-full">
-                    <div className="flex gap-4 w-full">
+                    <div className="flex gap-4 w-full bg-white p-4 rounded">
                         <div className="rounded w-[300px] h-[300px] flex items-center justify-center overflow-hidden relative border border-dashed border-gray-300">
                             <div className="absolute top-0 p-4 w-full backdrop-blur-sm flex justify-end gap-3 rounded-t">
                                 <Button
@@ -246,12 +270,16 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                 name="price"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <div className="flex gap-2">
-                                            <FormLabel>Price</FormLabel>
-                                            <p className='text-red-500'>*</p>
-                                        </div>
+                                        <FormLabel>Price</FormLabel>
                                         <FormControl>
-                                            <Input {...field} type="number" step="0.01" className="py-6 bg-[#edededed]" placeholder="Product price" />
+                                            <Input
+                                                {...field}
+                                                value={field.value ?? ""}   // 👈 fallback to ""
+                                                type="number"
+                                                step="0.01"
+                                                className="py-6 bg-[#edededed]"
+                                                placeholder="Product price"
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -461,12 +489,12 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                 name="isActive"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <div className="flex gap-2">
-                                            <FormLabel>Status</FormLabel>
-                                            <p className='text-red-500'>*</p>
-                                        </div>
+                                        <FormLabel>Status</FormLabel>
                                         <FormControl>
-                                            <Select onValueChange={(val) => field.onChange(val === "true")} defaultValue={String(field.value)}>
+                                            <Select
+                                                onValueChange={(val) => field.onChange(val === "true")}
+                                                defaultValue={String(field.value ?? true)}   // 👈 ensure string always set
+                                            >
                                                 <SelectTrigger className="py-6 w-full bg-[#edededed]">
                                                     <SelectValue placeholder="Active or Inactive" />
                                                 </SelectTrigger>
@@ -521,9 +549,9 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
             </Form>
 
             {openMedia && (
-                <div className='absolute inset-0 bg-white p-8'>
+                <div className='fixed inset-0 bg-black/50 p-8 z-50'>
                     <div className="flex flex-col justify-center h-full">
-                        <div className='w-full bg-white rounded custom-shadow-box p-4 flex flex-col gap-4 justify-center h-[500px] overflow-y-hidden'>
+                        <div className='w-full bg-white rounded teal-shadow-box p-4 flex flex-col gap-4 justify-center h-[500px] overflow-y-hidden'>
                             <div className="flex justify-end">
                                 <Button
                                     className='text-lg text-end w-fit font-bold cursor-pointer text-gray-400 bg-gray-100 hover:bg-gray-200 border border-gray-300'

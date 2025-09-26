@@ -46,7 +46,7 @@ const MediaImages = ({ onSelect }: MediaImagesProps) => {
   }, []);
 
   return (
-    <div className="h-full overflow-y-scroll">
+    <div className="h-full overflow-y-scroll z-50">
       <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
         <div className="w-full">
           <ImageUpload

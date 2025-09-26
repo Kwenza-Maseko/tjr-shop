@@ -78,14 +78,14 @@ const Announcements = () => {
           <Megaphone className="w-4 h-4" />
         </div>
 
-        <p className="text-gray-400">Public announcements for customers:</p>
+        <p className="text-gray-400">Public announcements for customers</p>
 
         {/* Input form */}
         <div className="flex gap-2 border border-gray-200 p-3 rounded-lg">
           <Input
             value={announcementText}
             className="text-lg border-none shadow-none outline-none flex-1"
-            placeholder="Type your store headline"
+            placeholder="Type your announcement"
             onChange={(e) => setAnnouncementText(e.target.value)}
           />
           <Button

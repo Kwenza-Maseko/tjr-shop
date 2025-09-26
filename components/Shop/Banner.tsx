@@ -147,7 +147,7 @@ const Banner = () => {
         </div>
 
         {openMedia && (
-          <div className='absolute inset-0 bg-white/80 p-8 '>
+          <div className='fixed inset-0 bg-black/50 p-8 z-50'>
             <div className="flex flex-col justify-center h-full">
               <div className='w-full bg-white rounded custom-shadow-box p-4 flex flex-col gap-4 justify-center h-[500px] overflow-y-hidden'>
                 <div className="flex justify-end">
@@ -160,9 +160,9 @@ const Banner = () => {
                 </div>
                 <MediaImages
                   onSelect={(item) => {
-                    setSelectedImage(item); // store id & imageUrl in state
-                    setBanner(item); // preview immediately
-                    setOpenMedia(false); // close modal
+                    setSelectedImage(item);
+                    setBanner(item);
+                    setOpenMedia(false);
                   }}
                 />
               </div>

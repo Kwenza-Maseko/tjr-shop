@@ -3,7 +3,7 @@
 import { signIn } from "@/userAuth"; // ✅ user auth instance
 import { db } from "@/database/drizzle";
 import { userTable } from "@/database/schema";
-import { AuthCredentails } from "@/types";
+import { AuthCredentails, User } from "@/types";
 import { hash } from "bcryptjs";
 import { eq } from "drizzle-orm";
 
@@ -25,7 +25,7 @@ export const signInWithCredentials = async (
         redirect: false,
         callbackUrl: "/",
       },
-      { basePath: "/api/auth" } // ✅ user auth route
+      { basePath: "/api/auth" }
     );
 
     if (result?.error) {
@@ -42,6 +42,14 @@ export const signInWithCredentials = async (
       return { success: false, error: "User not found after sign-in" };
     }
 
+    // ✅ update lastLogin with only the date (YYYY-MM-DD)
+    const today = new Date().toISOString().split("T")[0];
+
+    await db
+      .update(userTable)
+      .set({ lastLogin: today })
+      .where(eq(userTable.id, user[0].id));
+
     return {
       success: true,
       role: user[0].role ?? undefined,
@@ -51,6 +59,7 @@ export const signInWithCredentials = async (
     return { success: false, error: "Signin error" };
   }
 };
+
 
 export const signUp = async (params: AuthCredentails) => {
   const { fullName, email, password } = params;
@@ -83,3 +92,38 @@ export const signUp = async (params: AuthCredentails) => {
     return { success: false, error: "Signup error" };
   }
 };
+
+export async function updateLastLogin(userId: string) {
+  const today = new Date().toISOString().split("T")[0]; // "2025-09-06"
+
+  await db
+    .update(userTable)
+    .set({
+      lastLogin: today, // ✅ only date string
+    })
+    .where(eq(userTable.id, userId));
+}
+
+export const getUsers = async (): Promise<User[]> => {
+  const result = await db.select().from(userTable);
+
+  if (result.length === 0) {
+    console.log("no users found");
+    return [];
+  }
+
+  return result.map((row) => ({
+    id: row.id,
+    fullName: row.fullName,
+    email: row.email,
+    password: row.password,
+    role: row.role,
+    phoneNumber: row.phoneNumber,
+    createdAt: row.createdAt,
+    lastLogin: row.lastLogin ? new Date(row.lastLogin) : null, // ✅ convert string → Date
+    passwordResetToken: row.passwordResetToken,
+    passwordResetExpires: row.passwordResetExpires,
+  }));
+};
+
+

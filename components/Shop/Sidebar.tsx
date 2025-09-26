@@ -50,10 +50,11 @@ const Sidebar = ({ session }: SidebarProps) => {
                         <Link
                             key={item.urlName}
                             href={item.path}
+                            aria-current={pathname.startsWith(item.path) ? "page" : undefined}
                             className={cn(
                                 "flex items-center gap-2 mb-1 capitalize transition-colors p-2 rounded-md w-full",
-                                pathname.startsWith(`/${item.path}`)
-                                    ? "bg-teal-400 font-bold text-white teal-shadow-box"
+                                pathname === item.path
+                                    ? "bg-teal-400 font-bold text-white"
                                     : "text-gray-600 hover:text-teal-300"
                             )}
                         >

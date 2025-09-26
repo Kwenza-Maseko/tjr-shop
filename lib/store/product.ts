@@ -103,3 +103,30 @@ export const getProducts = async (): Promise<ProductParams[] | null> => {
   return mapped;
 };
 
+export const deleteProduct = async (id: string) => {
+  try {
+    const deleted = await db
+      .delete(productTable)
+      .where(eq(productTable.id, id))
+      .returning();
+
+    if (!deleted || deleted.length === 0) {
+      return {
+        success: false,
+        message: "Product not found or already deleted",
+      };
+    }
+
+    return {
+      success: true,
+      data: deleted[0], // return the deleted product for confirmation
+    };
+  } catch (error) {
+    console.error("Delete Product Error:", error);
+    return {
+      success: false,
+      message: "An error occurred while deleting product",
+    };
+  }
+};
+

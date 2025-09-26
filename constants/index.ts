@@ -42,50 +42,51 @@ export const storeNavLinks = [
 export const YourStoreNavLinks = [
   {
     urlName: "overview",
-    path: "",
+    path: "/admin",   // instead of ""
     icon: Home,
   },
   {
     urlName: "Products",
-    path: "products",
+    path: "/admin/products",
     icon: Package,
   },
   {
     urlName: "Analytics",
-    path: "analytics",
+    path: "/admin/analytics",
     icon: PieChartIcon,
   },
   {
     urlName: "Inventory",
-    path: "inventory",
+    path: "/admin/inventory",
     icon: BoxIcon,
   },
   {
     urlName: "orders",
-    path: "orders",
+    path: "/admin/orders",
     icon: ShoppingCart,
   },
   {
     urlName: "Sales",
-    path: "sales",
+    path: "/admin/sales",
     icon: BarChart2,
   },
   {
     urlName: "Customers",
-    path: "customers",
+    path: "/admin/customers",
     icon: Users,
   },
   {
     urlName: "announcement",
-    path: "announcements",
+    path: "/admin/announcements",
     icon: Megaphone,
   },
   {
     urlName: "settings",
-    path: "settings",
+    path: "/admin/settings",
     icon: Settings2Icon,
   },
 ];
+
 
 export const settings = [
   {

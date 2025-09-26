@@ -1,16 +1,18 @@
 import { string } from "zod";
 
-interface User {
-    id: string;
-    fullname: string;
-    email: string;
-    password: string;
-    role: "USERS" | null;
-    phoneNumber: string;
-    createdAt: Date | null;
-    passwordResetToken: string;
-    passwordResetExpires: Date | null;
+export interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  password: string;
+  role: "USERS" | "ADMIN" | null; // ✅ matches DB enum
+  phoneNumber: string | null;
+  createdAt: Date | null;         // ✅ timestamp with timezone
+  lastLogin: Date | null;         // ✅ stores date only (still valid as Date in TS)
+  passwordResetToken: string | null;
+  passwordResetExpires: Date | null;
 }
+
 
 interface AdminParams {
   id: string;

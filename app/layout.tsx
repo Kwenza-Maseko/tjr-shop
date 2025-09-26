@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
-import { auth } from "@/userAuth";
 import { Toaster } from "@/components/ui/sonner";
+import ClientNavbar from "@/components/ClientNavbar";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -17,8 +17,6 @@ export const metadata: Metadata = {
 };
 
 const RootLayout = async ({ children }: { children: ReactNode }) => {
-
-  const session = await auth();
 
   return (
     <html lang="en">
