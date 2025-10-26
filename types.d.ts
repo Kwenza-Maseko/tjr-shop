@@ -36,19 +36,19 @@ interface StoreDetailsParams {
 }
 
 interface AuthCredentails {
-    fullName: string;
-    email: string;
-    password: string;
+  fullName: string;
+  email: string;
+  password: string;
 }
 
 interface BannerParams {
-    mediaId: string;
+  mediaId: string;
 }
 
 interface MediaParams {
-    id: string;
-    imageUrl: string;
-    createdAt: Date | null;
+  id: string;
+  imageUrl: string;
+  createdAt: Date | null;
 }
 
 export interface ProductParams {
@@ -57,7 +57,8 @@ export interface ProductParams {
   imageUrl: string;
   description: string | null;
   productTarget: string;
-
+  productType: string | null;
+  color: string | null;
   price: number;
   discountPrice: number | null;
   stock: number; // default 0 at runtime
@@ -75,4 +76,6 @@ export interface ProductParams {
   isActive: boolean; // default true at runtime
   relatedProducts: (string | undefined)[] | null; // JSONB array
   variants: Record<string, any> | null; // JSONB object
+
+  brand: string | null;
 }

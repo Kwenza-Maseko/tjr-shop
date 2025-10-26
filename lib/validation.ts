@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 export const signUpSchema = z.object({
-    fullName: z.string().min(3),
-    email: z.string().email(),
-    password: z.string().min(8),
+  fullName: z.string().min(3),
+  email: z.string().email(),
+  password: z.string().min(8),
 });
 
 export const signInSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(8),
+  email: z.string().email(),
+  password: z.string().min(8),
 });
 
 export const storeContactDetailsValidation = z.object({
@@ -26,7 +26,8 @@ export const productValidation = z.object({
   imageUrl: z.string().min(1, "Invalid image URL"),
   description: z.string().nullable(),
   productTarget: z.string().min(1, "Product target is required"),
-
+  productType: z.string().nullable(),
+  color: z.string().nullable(),
   // Accept string, then convert to number
   price: z.coerce.number().min(1, "Price is required"),
   discountPrice: z.coerce.number().nullable(),
@@ -45,7 +46,9 @@ export const productValidation = z.object({
   isActive: z.boolean().nullable(),
   relatedProducts: z.array(z.string()).nullable(),
   variants: z.union([
-    z.array(z.string().nullable()), 
-    z.record(z.any())  
+    z.array(z.string().nullable()),
+    z.record(z.any())
   ]).optional().nullable(),
+  
+  brand: z.string().nullable(),
 });

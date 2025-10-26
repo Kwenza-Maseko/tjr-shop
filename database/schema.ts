@@ -87,6 +87,8 @@ export const productTable = pgTable("products", {
     imageUrl: varchar("image_url", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }),
     productTarget: varchar("product_target", { length: 255 }).notNull(),
+    productType: varchar("product_type", { length: 120 }),
+    color: varchar("color", { length: 100 }),
 
     price: numeric("price", { precision: 10, scale: 2 }).notNull(), // product price
     discountPrice: numeric("discount_price", { precision: 10, scale: 2 }), // optional sale price
@@ -106,6 +108,8 @@ export const productTable = pgTable("products", {
     relatedProducts: jsonb("related_products"), // list of related product IDs
     variants: jsonb("variants"), // for color/size variants
 
+    brand: varchar("brand", { length: 100 }),
+    
     createdAt: timestamp("created_at", {
         withTimezone: true,
     }).defaultNow(),

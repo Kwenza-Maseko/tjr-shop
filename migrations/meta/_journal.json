@@ -57,6 +57,20 @@
       "when": 1756194264807,
       "tag": "0007_icy_gorilla_man",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1760948985910,
+      "tag": "0008_wealthy_zombie",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1761331732944,
+      "tag": "0009_fearless_excalibur",
+      "breakpoints": true
     }
   ]
 }

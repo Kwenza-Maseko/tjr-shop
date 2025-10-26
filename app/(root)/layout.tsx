@@ -1,11 +1,17 @@
 import ClientNavbar from '@/components/ClientNavbar';
+import { auth } from '@/userAuth';
+import { redirect } from 'next/navigation';
 import { ReactNode } from 'react'
 
-const Layout = ({ children }: { children: ReactNode }) => {
+const Layout = async ({ children }: { children: ReactNode }) => {
+
+    const session = await auth();
+    if (!session) redirect("/sign-in");
+
     return (
         <div>
-            <ClientNavbar />
-            <div className='p-3 pt-[60px]  md:px-6'>
+            <ClientNavbar session={session} />
+            <div className='pt-[55px]'>
                 {children}
             </div>
         </div>

@@ -25,6 +25,24 @@ import MediaImages from './MediaImages';
 import { Edit2, Loader2 } from 'lucide-react';
 import { createOrUpdateProduct } from '@/lib/store/product';
 import { Input } from '../ui/input';
+import ColorPicker from '../ColorPicker';
+
+
+import {
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+} from "@/components/ui/popover";
+import {
+    Command,
+    CommandInput,
+    CommandList,
+    CommandEmpty,
+    CommandGroup,
+    CommandItem,
+} from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type CreateOrUpdateProductParams = {
     productToEdit?: ProductParams;
@@ -44,6 +62,33 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
     const [selectedImage, setSelectedImage] = useState<MediaItem | null>(null);
     const [openMedia, setOpenMedia] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [selectedColor, setSelectedColor] = useState<string | null>(null);
+    const [isColorPickerOpened, setIsColorPickerOpened] = useState(false);
+    const [textColor, setTextColor] = useState("#000000");
+    const [open, setOpen] = useState(false);
+    const [customBrand, setCustomBrand] = useState("");
+
+    const colors = [
+        { name: "Black", hex: "#000000" },
+        { name: "White", hex: "#ffffff" },
+        { name: "Red", hex: "#ff0000" },
+        { name: "Blue", hex: "#0000ff" },
+        { name: "Green", hex: "#008000" },
+        { name: "Yellow", hex: "#ffff00" },
+        { name: "Gray", hex: "#808080" },
+        { name: "Purple", hex: "#800080" },
+    ];
+
+    const brands = [
+        "Nike",
+        "Adidas",
+        "Gucci",
+        "Louis Vuitton",
+        "New Balance",
+        "Puma",
+        "North Face",
+        "Umbro",
+    ];
 
     const form = useForm<z.infer<typeof productValidation>>({
         resolver: zodResolver(productValidation),
@@ -53,6 +98,8 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
             imageUrl: productToEdit?.imageUrl ?? "",
             description: productToEdit?.description ?? "",
             productTarget: productToEdit?.productTarget ?? "",
+            productType: productToEdit?.productType ?? "",
+            color: productToEdit?.color ?? "",
             price: productToEdit?.price,
             discountPrice: productToEdit?.discountPrice ?? null,
             stock: productToEdit?.stock ?? 0,
@@ -66,6 +113,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
             isActive: productToEdit?.isActive ?? true,
             relatedProducts: productToEdit?.relatedProducts ?? [],
             variants: productToEdit?.variants ?? [],
+            brand: productToEdit?.brand ?? null
         },
     });
 
@@ -91,6 +139,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                 isActive: productToEdit.isActive,
                 relatedProducts: productToEdit.relatedProducts,
                 variants: productToEdit.variants,
+                brand: productToEdit?.brand
             });
         } else {
             // Creating new product → reset to empty defaults
@@ -113,6 +162,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                 isActive: true,
                 relatedProducts: [],
                 variants: [],
+                brand: null
             });
             setSelectedImage(null); // also clear selected image
         }
@@ -137,6 +187,8 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
             imageUrl: selectedImage?.imageUrl ?? form.getValues("imageUrl"),
             description: form.getValues("description") ?? null,
             productTarget: form.getValues("productTarget"),
+            productType: form.getValues("productType") ?? null,
+            color: form.getValues("color") ?? null,
             price: form.getValues("price"), // string is fine here
             discountPrice: form.getValues("discountPrice") ?? null,
             stock: form.getValues("stock") ? Number(form.getValues("stock")) : 0,
@@ -152,6 +204,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                 ? (form.getValues("relatedProducts") as string[])
                 : null,
             variants: form.getValues("variants") ?? null,
+            brand: form.getValues("brand") ?? null
         };
 
 
@@ -164,6 +217,8 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
 
             const normalizedData: ProductParams = {
                 ...result.data,
+                productType: result.data.productType || null,
+                color: result.data.color || null,
                 price: Number(result.data.price),
                 discountPrice: result.data.discountPrice ? Number(result.data.discountPrice) : 0,
                 stock: result.data.stock ? Number(result.data.stock) : 0,
@@ -187,6 +242,8 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
         }
 
     };
+
+    const toggleColorPicker = () => setIsColorPickerOpened(prev => !prev);
 
     return (
         <div className=' w-full'>
@@ -233,7 +290,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <p className='text-red-500'>*</p>
                                         </div>
                                         <FormControl>
-                                            <Input className="py-6 bg-[#edededed]" {...field} placeholder="Product Name" />
+                                            <Input className="py-5 bg-[#edededed]" {...field} placeholder="Product Name" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -250,12 +307,73 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <Input
                                                 {...field}
                                                 value={field.value ?? ""}
-                                                className="py-6 bg-[#edededed] text-lg" placeholder="Description" />
+                                                className="py-5 bg-[#edededed] text-lg" placeholder="Description" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
+
+                            {/* Filter by Color */}
+                            <FormField
+                                control={form.control}
+                                name="color"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Color</FormLabel>
+                                        <div className="grid grid-cols-3 gap-4 relative">
+                                            {colors.map((color) => (
+                                                <div
+                                                    key={color.name}
+                                                    className="flex flex-col items-center cursor-pointer"
+                                                    onClick={() => field.onChange(color.name)}
+                                                >
+                                                    <div
+                                                        className={`w-8 h-8 rounded-full border-2 transition-all ${field.value === color.name ? "border-black scale-110" : "border-gray-300"
+                                                            }`}
+                                                        style={{ backgroundColor: color.hex }}
+                                                    ></div>
+                                                    <span
+                                                        className={`text-xs mt-1 ${field.value === color.name ? "text-black font-semibold" : "text-gray-600"
+                                                            }`}
+                                                    >
+                                                        {color.name}
+                                                    </span>
+                                                </div>
+                                            ))}
+
+                                            <div>
+                                                <div className='absolute bottom-16 right-4  bg-white'>
+                                                    {
+                                                        isColorPickerOpened && (
+                                                            <ColorPicker
+                                                                value={textColor}
+                                                                onPickerChange={(color) => setTextColor(color)}
+                                                            />
+                                                        )
+                                                    }
+                                                </div>
+
+
+                                                <div className='flex flex-col items-center gap-1'>
+                                                    <div
+                                                        className="rounded-full w-8 h-8 border-2 border-gray-300 cursor-pointer"
+                                                        style={{ backgroundColor: textColor }}
+                                                        onClick={toggleColorPicker}
+                                                    />
+
+                                                    <p className='text-xs text-gray-600'>Select Color</p>
+                                                </div>
+
+
+                                            </div>
+
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
                         </div>
                     </div>
 
@@ -277,7 +395,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                                 value={field.value ?? ""}   // 👈 fallback to ""
                                                 type="number"
                                                 step="0.01"
-                                                className="py-6 bg-[#edededed]"
+                                                className="py-5 bg-[#edededed]"
                                                 placeholder="Product price"
                                             />
                                         </FormControl>
@@ -297,7 +415,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <Input
                                                 {...field}
                                                 value={field.value ?? ""}
-                                                type="number" step="0.01" className="py-6 bg-[#edededed]" placeholder="Discounted price (optional)" />
+                                                type="number" step="0.01" className="py-5 bg-[#edededed]" placeholder="Discounted price (optional)" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -315,7 +433,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <Input
                                                 {...field}
                                                 value={field.value ?? ""}
-                                                type="number" className="py-6 bg-[#edededed]" placeholder="Available stock" />
+                                                type="number" className="py-5 bg-[#edededed]" placeholder="Available stock" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -332,7 +450,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <p className='text-red-500'>*</p>
                                         </div>
                                         <FormControl>
-                                            <Input className="py-6 bg-[#edededed]" {...field} placeholder="Unique SKU" />
+                                            <Input className="py-5 bg-[#edededed]" {...field} placeholder="Unique SKU" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -358,7 +476,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <Input
                                                 {...field}
                                                 value={field.value ?? ""}
-                                                className="py-6 bg-[#edededed]" placeholder="Category" />
+                                                className="py-5 bg-[#edededed]" placeholder="Category" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -376,7 +494,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <Input
                                                 {...field}
                                                 value={field.value ?? ""}
-                                                className="py-6 bg-[#edededed]" placeholder="Comma-separated tags" />
+                                                className="py-5 bg-[#edededed]" placeholder="Comma-separated tags" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -403,7 +521,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
 
                                                 {...field}
                                                 value={field.value ?? ""}
-                                                className="py-6 bg-[#edededed]" placeholder="Weight (e.g., 1kg)" />
+                                                className="py-5 bg-[#edededed]" placeholder="Weight (e.g., 1kg)" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -421,7 +539,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <Input
                                                 {...field}
                                                 value={field.value ?? ""}
-                                                className="py-6 bg-[#edededed]"
+                                                className="py-5 bg-[#edededed]"
                                                 placeholder="Dimensions (e.g., 10x20x5 cm)"
                                             />
                                         </FormControl>
@@ -450,7 +568,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <Input
                                                 {...field}
                                                 value={field.value ?? ""}
-                                                type="number" step="0.1" min="0" max="5" className="py-6 bg-[#edededed]" placeholder="0 - 5 rating" />
+                                                type="number" step="0.1" min="0" max="5" className="py-5 bg-[#edededed]" placeholder="0 - 5 rating" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -468,7 +586,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <Input
                                                 {...field}
                                                 value={field.value ?? ""}
-                                                type="number" className="py-6 bg-[#edededed]" placeholder="Number of reviews" />
+                                                type="number" className="py-5 bg-[#edededed]" placeholder="Number of reviews" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -495,7 +613,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                                 onValueChange={(val) => field.onChange(val === "true")}
                                                 defaultValue={String(field.value ?? true)}   // 👈 ensure string always set
                                             >
-                                                <SelectTrigger className="py-6 w-full bg-[#edededed]">
+                                                <SelectTrigger className="py-5 w-full bg-[#edededed]">
                                                     <SelectValue placeholder="Active or Inactive" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -512,7 +630,6 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                     </div>
 
                     <div className='bg-white p-4 rounded custom-light-shadow-box'>
-
                         <h1 className='text-gray-500 font-bold text-[12pt] mb-4'>Targeted Market</h1>
 
                         <div className="space-y-3">
@@ -524,19 +641,129 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                 render={({ field }) => (
                                     <FormItem>
                                         <div className="flex gap-2">
-                                            <FormLabel>Target Market</FormLabel>
+                                            <FormLabel>Filter Type ie. legging, top-ware ect</FormLabel>
                                             <p className='text-red-500'>*</p>
                                         </div>
                                         <FormControl>
-                                            <Input className="py-6 bg-[#edededed]" {...field} placeholder="Target Market" />
+                                            <Input className="py-5 bg-[#edededed]" {...field} placeholder="Target Market" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
+
+                            <FormField
+                                control={form.control}
+                                name="productType"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Product Type</FormLabel>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value ?? ""}
+                                            >
+                                                <SelectTrigger className="py-5 w-full bg-[#edededed]">
+                                                    <SelectValue placeholder="Select Product Type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="kids">Kids</SelectItem>
+                                                    <SelectItem value="men">Men</SelectItem>
+                                                    <SelectItem value="women">Women</SelectItem>
+                                                    <SelectItem value="unisex">Unisex</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+
                         </div>
                     </div>
 
+                    <div className="bg-white p-4 rounded custom-light-shadow-box">
+                        <h1 className="text-gray-500 font-bold text-[12pt] mb-4">Product Brand</h1>
+
+                        <FormField
+                            control={form.control}
+                            name="brand"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Brand</FormLabel>
+                                    <FormControl>
+                                        <Popover open={open} onOpenChange={setOpen}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    aria-expanded={open}
+                                                    className="justify-between py-5 bg-[#ededed] w-full"
+                                                >
+                                                    {field.value
+                                                        ? brands.find((b) => b === field.value) || field.value
+                                                        : "Select or type a brand"}
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0">
+                                                <Command>
+                                                    <CommandInput
+                                                        placeholder="Search or type brand..."
+                                                        onValueChange={setCustomBrand}
+                                                    />
+                                                    <CommandList>
+                                                        <CommandEmpty>
+                                                            <div className="p-2">
+                                                                <p className="text-sm text-gray-600 mb-2">
+                                                                    Brand not listed? Add custom:
+                                                                </p>
+                                                                <Button
+                                                                    type="button"
+                                                                    size="sm"
+                                                                    className="w-full"
+                                                                    onClick={() => {
+                                                                        field.onChange(customBrand);
+                                                                        setOpen(false);
+                                                                    }}
+                                                                >
+                                                                    Add “{customBrand}”
+                                                                </Button>
+                                                            </div>
+                                                        </CommandEmpty>
+                                                        <CommandGroup>
+                                                            {brands.map((brand) => (
+                                                                <CommandItem
+                                                                    key={brand}
+                                                                    value={brand}
+                                                                    onSelect={(val) => {
+                                                                        field.onChange(val);
+                                                                        setOpen(false);
+                                                                    }}
+                                                                >
+                                                                    <Check
+                                                                        className={cn(
+                                                                            "mr-2 h-4 w-4",
+                                                                            field.value === brand
+                                                                                ? "opacity-100"
+                                                                                : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    {brand}
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
                     <Button type="submit" disabled={loading}
 

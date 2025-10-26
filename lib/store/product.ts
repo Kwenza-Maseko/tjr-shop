@@ -3,16 +3,16 @@
 import { db } from "@/database/drizzle";
 import { productTable } from "@/database/schema";
 import { ProductParams } from "@/types";
-import { eq } from "drizzle-orm";
+import { eq, or, and } from "drizzle-orm";
 
 export const createOrUpdateProduct = async (params: ProductParams) => {
   try {
     const existingProduct = params.id
       ? await db
-          .select()
-          .from(productTable)
-          .where(eq(productTable.id, params.id))
-          .limit(1)
+        .select()
+        .from(productTable)
+        .where(eq(productTable.id, params.id))
+        .limit(1)
       : [];
 
     let product;
@@ -23,6 +23,8 @@ export const createOrUpdateProduct = async (params: ProductParams) => {
       imageUrl: params.imageUrl,
       description: params.description,
       productTarget: params.productTarget,
+      productType: params.productType ?? null,
+      color: params.color ?? null,
       price: params.price.toString(),
       discountPrice: params.discountPrice?.toString() ?? null,
       stock: params.stock ?? 0,
@@ -36,6 +38,7 @@ export const createOrUpdateProduct = async (params: ProductParams) => {
       isActive: params.isActive ?? true,
       relatedProducts: params.relatedProducts ?? [],
       variants: params.variants ?? {},
+      brand: params.brand ?? null
     };
 
     if (existingProduct.length > 0) {
@@ -68,7 +71,6 @@ export const createOrUpdateProduct = async (params: ProductParams) => {
 };
 
 
-
 export const getProducts = async (): Promise<ProductParams[] | null> => {
   const result = await db.select().from(productTable);
 
@@ -80,6 +82,8 @@ export const getProducts = async (): Promise<ProductParams[] | null> => {
     imageUrl: item.imageUrl,
     description: item.description ?? null,
     productTarget: item.productTarget,
+    productType: item.productType ?? null,
+    color: item.color ?? null,
 
     price: Number(item.price), // convert string -> number
     discountPrice: item.discountPrice !== null ? Number(item.discountPrice) : null,
@@ -98,6 +102,7 @@ export const getProducts = async (): Promise<ProductParams[] | null> => {
     isActive: item.isActive ?? true,
     relatedProducts: (item.relatedProducts as string[] | null) ?? [],
     variants: (item.variants as Record<string, any> | null) ?? {},
+    brand: item.brand ?? null
   }));
 
   return mapped;
@@ -130,3 +135,55 @@ export const deleteProduct = async (id: string) => {
   }
 };
 
+export const getStoreProducts = async (
+  productType?: string,
+  productTarget?: string 
+): Promise<ProductParams[] | null> => {
+  let result;
+
+  if (productType && productTarget) {
+    result = await db
+      .select()
+      .from(productTable)
+      .where(
+        and(
+          (
+            eq(productTable.productType, productType)
+          ),
+          or(
+            eq(productTable.productTarget, productTarget),
+            eq(productTable.productType, "unisex")
+          )
+        )
+      );
+  } else {
+    result = await db.select().from(productTable);
+  }
+
+  if (!result || result.length === 0) return null;
+
+  return result.map((item) => ({
+    id: item.id,
+    productName: item.productName,
+    imageUrl: item.imageUrl,
+    description: item.description ?? null,
+    productTarget: item.productTarget,
+    productType: item.productType ?? null,
+    color: item.color ?? null,
+    price: Number(item.price),
+    discountPrice:
+      item.discountPrice !== null ? Number(item.discountPrice) : null,
+    stock: item.stock ?? 0,
+    sku: item.sku,
+    category: item.category ?? null,
+    tags: item.tags ?? null,
+    weight: item.weight !== null ? Number(item.weight) : null,
+    dimensions: item.dimensions ?? null,
+    rating: item.rating !== null ? Number(item.rating) : 0,
+    reviewCount: item.reviewCount ?? 0,
+    isActive: item.isActive ?? true,
+    relatedProducts: (item.relatedProducts as string[] | null) ?? [],
+    variants: (item.variants as Record<string, any> | null) ?? {},
+    brand: item.brand ?? null,
+  }));
+};
