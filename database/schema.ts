@@ -1,5 +1,17 @@
 import { sql } from "drizzle-orm";
-import { boolean, date, integer, jsonb, numeric, pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+    boolean,
+    date,
+    integer,
+    jsonb,
+    numeric,
+    pgEnum,
+    pgTable,
+    text,
+    timestamp,
+    uuid,
+    varchar
+} from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", ["USERS", "ADMIN"]);
 export const accessEnum = pgEnum("access", ["GRANTED", "NOT GRANTED"]);
@@ -25,8 +37,6 @@ export const userTable = pgTable("users", {
     passwordResetToken: varchar("password_reset_token", { length: 255 }),
     passwordResetExpires: timestamp("password_reset_expires", { withTimezone: true })
 });
-
-
 
 export const adminTable = pgTable("admin", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -109,12 +119,11 @@ export const productTable = pgTable("products", {
     variants: jsonb("variants"), // for color/size variants
 
     brand: varchar("brand", { length: 100 }),
-    
+
     createdAt: timestamp("created_at", {
         withTimezone: true,
     }).defaultNow(),
 });
-
 
 export const announcements = pgTable("announcements", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -122,4 +131,32 @@ export const announcements = pgTable("announcements", {
     createdAt: timestamp("created_at", {
         withTimezone: true,
     }).defaultNow(),
+});
+
+export const cartTable = pgTable("cart", {
+  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => userTable.id, { onDelete: "cascade" }),
+
+  productId: uuid("product_id")
+    .notNull()
+    .references(() => productTable.id, { onDelete: "cascade" }),
+
+  imageId: uuid("image_id")
+    .notNull()
+    .references(() => media.id, { onDelete: "cascade" }),
+
+  quantity: integer("quantity").notNull().default(1),
+
+  priceSnapshot: numeric("price_snapshot", { precision: 10, scale: 2 }),
+  discountSnapshot: numeric("discount_snapshot", { precision: 10, scale: 2 }),
+
+  selectedOptions: jsonb("selected_options"),
+
+  isActive: boolean("is_active").default(true),
+
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

@@ -71,6 +71,20 @@
       "when": 1761331732944,
       "tag": "0009_fearless_excalibur",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1761675774149,
+      "tag": "0010_chubby_radioactive_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1761677993891,
+      "tag": "0011_gray_arachne",
+      "breakpoints": true
     }
   ]
 }
