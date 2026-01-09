@@ -7,6 +7,7 @@ import config from "@/lib/config";
 import Link from "next/link";
 import { useFilter } from "@/components/FilterContext";
 import { useProductStore } from "@/lib/store/productStore";
+import { getProductsWithDeals } from "@/lib/store/deals";
 
 const { urlEndpoint, publicKey } = config.env.imagekit;
 
@@ -20,11 +21,30 @@ interface Props {
   params: Promise<RouteParams>;
 }
 
+interface ProductWithDeal extends ProductParams {
+  dealCoupon?: string | null
+}
+
 export default function SubSubPage({ params }: Props) {
   const { category, subcategory, subsub } = use(params) as RouteParams; // 👈 type assertion
-  const [products, setProducts] = useState<ProductParams[] | null>(null);
-
+  const [products, setProducts] = useState<ProductWithDeal[]>([]);
+  const [loading, setLoading] = useState(false);
   const { brand, color, priceRange } = useFilter();
+
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const productData = await getProductsWithDeals()
+        if (productData) setProducts(productData)
+      } catch (err) {
+        console.error("Error fetching products:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [])
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -68,47 +88,55 @@ export default function SubSubPage({ params }: Props) {
 
       {products && products.length > 0 ? (
         <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
-          <div className="flex flex-wrap gap-4 p-3 md:justify-start justify-center">
+          <div
+            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-3"
+          >
             {products.map((product) => (
               <Link
                 href={`/product/${product.id}`}
                 key={product.id}
-                onClick={() => useProductStore.getState().setSelectedProduct(product)}
-                className="overflow-hidden w-[100px] sm:w-[150px] md:w-[250px]"
+                onClick={() =>
+                  useProductStore.getState().setSelectedProduct(product)
+                }
+                className="overflow-hidden"
               >
-                <div className="w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[250px] md:h-[250px]">
+                <div className="w-full h-[150px] md:h-[250px]">
                   <IKImage
                     path={product.imageUrl}
                     alt={product.productName || "Product Image"}
-                    className="custom-light-shadow-box object-cover w-full h-full"
+                    className="custom-light-shadow-box object-contain w-full h-full"
                     loading="lazy"
-                    width={250}        // Required for optimization
+                    width={250}
                     height={250}
                   />
                 </div>
 
-                <div className="mt-3 space-y-3">
+                <div className="mt-3 space-y-1 md:space-y-3">
                   <div className="flex justify-between">
                     <p className="text-xs md:text-[16px] md:font-bold max-w-[99%] truncate">
                       {product.productName}
                     </p>
+
                     {product.brand && (
                       <div className="py-0.1 px-2 bg-green-200 border border-green-300 text-green-950 rounded flex items-center font-medium">
                         <p className="text-xs">{product.brand}</p>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs md:text-md font-medium max-w-[99%] truncate text-gray-600 hidden md:block">
+
+                  <p className="text-xs md:text-md font-medium truncate text-gray-600 hidden md:block">
                     {product.productTarget}
                   </p>
+
                   <div className="text-xs font-bold flex gap-0.5">
-                    <p className="md:mt-1 text-xs">R</p>
+                    <span>R</span>
                     <p className="text-md md:text-lg font-bold">{product.price}</p>
                   </div>
                 </div>
               </Link>
             ))}
           </div>
+
         </ImageKitProvider>
       ) : (
         <p className="mt-6 text-gray-500">No products found for this category.</p>

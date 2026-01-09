@@ -90,8 +90,8 @@ const ClientNavbar = ({ session }: SidebarProps) => {
                 <div className="flex gap-3 items-center">
                     {session?.user && (
                         <div className="flex items-center gap-3 relative">
-                            <ShoppingCart className="w-5 h-5" />
-                            <Bell className="w-5 h-5" />
+                            <ShoppingCart className="w-6 h-6" />
+                            <Bell className="w-6 h-6" />
                             <div className="w-[30px] h-[30px] rounded-full flex items-center justify-center bg-gray-300 border border-gray-500 text-xs font-bold cursor-pointer"
                                 onClick={() => {
                                     setDropdown((prev) => !prev);
@@ -129,7 +129,7 @@ const ClientNavbar = ({ session }: SidebarProps) => {
 
                     )}
 
-                    <div className="space-y-2 w-6 cursor-pointer md:hidden"
+                    <div className="space-y-1.5 w-6 cursor-pointer md:hidden"
                         onClick={() => setMenuDropdown(prev => !prev)}
                     >
                         <div className='w-full h-0.5 bg-zinc-600' />

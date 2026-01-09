@@ -7,7 +7,8 @@ import {
   PieChartIcon,
   BarChart2,
   BoxIcon,
-  Settings2Icon
+  Settings2Icon,
+  ChartBarDecreasingIcon
 } from "lucide-react";
 
 export const FIELD_NAMES = {
@@ -84,6 +85,11 @@ export const YourStoreNavLinks = [
     urlName: "settings",
     path: "/admin/settings",
     icon: Settings2Icon,
+  },
+  {
+    urlName: "discount",
+    path: "/admin/discount",
+    icon: ChartBarDecreasingIcon,
   },
 ];
 

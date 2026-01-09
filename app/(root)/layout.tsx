@@ -11,7 +11,7 @@ const Layout = async ({ children }: { children: ReactNode }) => {
     return (
         <div>
             <ClientNavbar session={session} />
-            <div className='pt-[55px]'>
+            <div className='pt-[50px]'>
                 {children}
             </div>
         </div>

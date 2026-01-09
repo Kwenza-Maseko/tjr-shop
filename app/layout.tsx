@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Lato } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import ClientNavbar from "@/components/ClientNavbar";
+import { DealsProvider } from "@/components/providers/DealContext";
 
-const nunito = Nunito({
+const lato = Lato({
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800", "900"], // Add the weights you need
-  variable: "--font-nunito",
+  weight: ["100", "400", "700", "900"], // Only supported weight
+  variable: "--font-lato",
 });
+
 
 export const metadata: Metadata = {
   title: "TJR Shop",
@@ -17,17 +19,18 @@ export const metadata: Metadata = {
 };
 
 const RootLayout = async ({ children }: { children: ReactNode }) => {
-
   return (
     <html lang="en">
-      <body
-        className={`${nunito.className} antialiased font-medium text-sm bg-[#f1f2ff]`}
-      >
-        <Toaster />
-        {children}
-      </body>
+      <DealsProvider>
+        <body
+          className={`${lato.className} antialiased font-medium text-sm bg-[#fafaff]`}
+        >
+          <Toaster />
+          {children}
+        </body>
+      </DealsProvider>
     </html>
   );
-}
+};
 
 export default RootLayout;

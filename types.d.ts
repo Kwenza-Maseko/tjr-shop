@@ -13,8 +13,7 @@ export interface User {
   passwordResetExpires: Date | null;
 }
 
-
-interface AdminParams {
+export interface AdminParams {
   id: string;
   fullName: string;
   email: string;
@@ -26,7 +25,7 @@ interface AdminParams {
   passwordResetExpires: Date | null;
 }
 
-interface StoreDetailsParams {
+export interface StoreDetailsParams {
   id?: string;
   streetAddress: string;
   town: string | null;
@@ -35,22 +34,21 @@ interface StoreDetailsParams {
   storeEmail: string | null;
 }
 
-interface AuthCredentails {
+export interface AuthCredentails {
   fullName: string;
   email: string;
   password: string;
 }
 
-interface BannerParams {
+export interface BannerParams {
   mediaId: string;
 }
 
-interface MediaParams {
+export interface MediaParams {
   id: string;
   imageUrl: string;
   createdAt: Date | null;
 }
-
 export interface ProductParams {
   id?: string;
   productName: string;
@@ -78,4 +76,24 @@ export interface ProductParams {
   variants: Record<string, any> | null; // JSONB object
 
   brand: string | null;
+}
+
+export interface Deals {
+  id: string;
+  dealCoupon: string;
+  percentage: number;
+  createdAt: Date | null;
+}
+
+export interface DealTimeSpan {
+  id: string;
+  dealId: string;
+  timeSpan: Date | null;
+}
+
+export interface DealProducts {
+  id: string;
+  dealId: string;
+  productId: string;
+  createdAt: Date | null;
 }

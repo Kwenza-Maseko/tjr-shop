@@ -134,29 +134,58 @@ export const announcements = pgTable("announcements", {
 });
 
 export const cartTable = pgTable("cart", {
-  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
 
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => userTable.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+        .notNull()
+        .references(() => userTable.id, { onDelete: "cascade" }),
 
-  productId: uuid("product_id")
-    .notNull()
-    .references(() => productTable.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+        .notNull()
+        .references(() => productTable.id, { onDelete: "cascade" }),
 
-  imageId: uuid("image_id")
-    .notNull()
-    .references(() => media.id, { onDelete: "cascade" }),
+    imageId: uuid("image_id")
+        .notNull()
+        .references(() => media.id, { onDelete: "cascade" }),
 
-  quantity: integer("quantity").notNull().default(1),
+    quantity: integer("quantity").notNull().default(1),
 
-  priceSnapshot: numeric("price_snapshot", { precision: 10, scale: 2 }),
-  discountSnapshot: numeric("discount_snapshot", { precision: 10, scale: 2 }),
+    priceSnapshot: numeric("price_snapshot", { precision: 10, scale: 2 }),
+    discountSnapshot: numeric("discount_snapshot", { precision: 10, scale: 2 }),
 
-  selectedOptions: jsonb("selected_options"),
+    selectedOptions: jsonb("selected_options"),
 
-  isActive: boolean("is_active").default(true),
+    isActive: boolean("is_active").default(true),
 
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
+
+export const deals = pgTable("deals", {
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    dealCoupon: varchar("deal_coupon", { length: 255 }).notNull(),
+    percentage: integer("percentage").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+
+// Junction table for multiple products per deal
+export const dealProducts = pgTable("deal_products", {
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    dealId: uuid("deal_id")
+        .notNull()
+        .references(() => deals.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+        .notNull()
+        .references(() => productTable.id, { onDelete: "cascade" }),
+});
+
+export const dealTimeSpan = pgTable("deal_time_span", {
+  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+  dealId: uuid("deal_id")
+    .notNull()
+    .references(() => deals.id, { onDelete: "cascade" }),
+  timeSpan: timestamp("time_span", { withTimezone: true }).defaultNow(),
+});
+
+

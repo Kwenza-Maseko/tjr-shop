@@ -85,6 +85,27 @@
       "when": 1761677993891,
       "tag": "0011_gray_arachne",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1762423023231,
+      "tag": "0012_common_talon",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1762423876700,
+      "tag": "0013_sloppy_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1762854359743,
+      "tag": "0014_small_landau",
+      "breakpoints": true
     }
   ]
 }

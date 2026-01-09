@@ -187,3 +187,42 @@ export const getStoreProducts = async (
     brand: item.brand ?? null,
   }));
 };
+
+
+
+export const getLatestProducts = async (): Promise<ProductParams[] | null> => {
+  const result = await db.select().from(productTable).limit(2);
+
+  if (result.length === 0) return null;
+
+  const mapped = result.map((item) => ({
+    id: item.id,
+    productName: item.productName,
+    imageUrl: item.imageUrl,
+    description: item.description ?? null,
+    productTarget: item.productTarget,
+    productType: item.productType ?? null,
+    color: item.color ?? null,
+
+    price: Number(item.price), // convert string -> number
+    discountPrice: item.discountPrice !== null ? Number(item.discountPrice) : null,
+    stock: item.stock ?? 0,
+    sku: item.sku,
+
+    category: item.category ?? null,
+    tags: item.tags ?? null,
+
+    weight: item.weight !== null ? Number(item.weight) : null,
+    dimensions: item.dimensions ?? null,
+
+    rating: item.rating !== null ? Number(item.rating) : 0,
+    reviewCount: item.reviewCount ?? 0,
+
+    isActive: item.isActive ?? true,
+    relatedProducts: (item.relatedProducts as string[] | null) ?? [],
+    variants: (item.variants as Record<string, any> | null) ?? {},
+    brand: item.brand ?? null
+  }));
+
+  return mapped;
+};

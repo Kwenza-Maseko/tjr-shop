@@ -141,6 +141,10 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.322);
 }
 
+.custom-shadow-box-second {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.075);
+}
+
 .teal-shadow-box {
   box-shadow: 0 0 15px rgba(3, 88, 94, 0.26);
 }

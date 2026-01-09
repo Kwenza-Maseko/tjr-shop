@@ -1,7 +1,9 @@
 'use client'
+import DealTimeSpanDisplay from '@/components/DealTimeSpanDisplay';
+import DisplayDeals from '@/components/DisplayDeals';
 import DisplayBanner from '@/components/Shop/DisplayBanner'
 import config from '@/lib/config';
-import { getProducts } from '@/lib/store/product';
+import { getLatestProducts, getProducts } from '@/lib/store/product';
 import { ProductParams } from '@/types';
 import { IKImage, ImageKitProvider } from 'imagekitio-next';
 import React, { useEffect, useState } from 'react'
@@ -13,7 +15,7 @@ const HomePage = () => {
   const [products, setProducts] = useState<ProductParams[] | null>(null);
   useEffect(() => {
     const fetchProduct = async () => {
-      const productData = await getProducts();
+      const productData = await getLatestProducts();
       setProducts(productData);
     };
 
@@ -22,34 +24,36 @@ const HomePage = () => {
 
   return (
     <div className='w-full space-y-5'>
+      <DealTimeSpanDisplay />
       <DisplayBanner />
-      <div className='space-y-5 p-3 md:px-6'>
+      <DisplayDeals />
+      <div className='space-y-5 px-0  md:px-6'>
         <div className="">
-          <h1 className='text-2xl font-black mb-5'>Latest on a Catalog</h1>
+          <h1 className='text-2xl md:text-3xl text-center font-medium mb-8'>Latest on a Catalog</h1>
           {products && products.length > 0 && (
             <ImageKitProvider
               urlEndpoint={urlEndpoint}
               publicKey={publicKey}
             >
-              <div className="flex gap-4 justify-between p-3 custom relative flex-wrap">
+              <div className="flex gap-4 relative flex-wrap">
                 {products.map((product) => (
-                  <div key={product?.id} className="relative rounded-lg overflow-hidden">
+                  <div key={product?.id} className="mx-auto relative w-[600px] h-[600px] overflow-hidden">
                     {/* Product Image */}
                     <IKImage
                       path={product?.imageUrl}
                       alt={product?.productName || "Product Image"}
-                      className="custom-light-shadow-box rounded-lg object-cover"
+                      className=" object-cover"
                       loading="lazy"
-                      width={300}
-                      height={300}
+                      fill
                     />
 
                     {/* Gradient Overlay with Product Name */}
                     {product?.productName && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end justify-center">
-                        <div className="mb-3 w-full px-2 text-center">
-                          <p className="bg-white/90 backdrop-blur-sm text-black text-sm font-semibold px-4 py-1 rounded-full max-w-[99%] truncate">
-                            {product.productName} 
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col items-start justify-end gap-3  px-8 md:px-10 py-4 md:py-10">
+                        <p className='capitalize text-lg text-white'>Category: {product.productType}</p>
+                        <div className=" w-full text-center">
+                          <p className="bg-white/90 backdrop-blur-sm text-black text-md md:text-lg font-semibold w-fit rounded-full truncate  px-8 py-1">
+                            {product.productName}
                           </p>
                         </div>
                       </div>

@@ -4,58 +4,71 @@ import { useEffect, useState } from 'react';
 import { IKImage, ImageKitProvider } from 'imagekitio-next';
 import config from '@/lib/config';
 import { getBanners } from '@/lib/store/banner';
+import { Truck, Lock, RefreshCw, Clock } from 'lucide-react';
+import { Button } from '../ui/button';
+import { useDeals } from '../providers/DealContext';
 
 const { urlEndpoint, publicKey } = config.env.imagekit;
 
 const DisplayBanner = () => {
+  const [banner, setBanner] = useState<{ id: string; imageUrl: string } | null>(null);
 
-    const [banner, setBanner] = useState<{ id: string; imageUrl: string } | null>(null);
+  // ✅ Use deals from context (DO NOT fetch again)
+  const { deals, expired } = useDeals();
 
-    useEffect(() => {
-        const fetchBanner = async () => {
-            const bannerData = await getBanners();
-            setBanner(bannerData);
-        };
-        fetchBanner();
-    }, []);
+  useEffect(() => {
+    const fetchBanner = async () => {
+      const bannerData = await getBanners();
+      setBanner(bannerData);
+    };
+    fetchBanner();
+  }, []);
 
+  return (
+    <div className="w-full pt-14">
+      {/* Banner Section */}
+      {banner?.imageUrl && (
+        <div className="relative w-full h-[300px] md:h-[500px]">
+          <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
+            <IKImage
+              path={banner.imageUrl}
+              alt="Store Banner"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+              fill
+            />
+          </ImageKitProvider>
+        </div>
+      )}
 
-    return (
-        <div>
-            {banner?.imageUrl && (
-                <div className="relative w-full h-[300px] md:h-[500px]">
-                    <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
-                        <IKImage
-                            path={banner.imageUrl}
-                            alt="Store Banner"
-                            className="absolute inset-0 w-full h-full object-cover"
-                            loading="lazy"
-                            fill
-                        />
-                    </ImageKitProvider>
-
-                    {/* Black gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent text-white flex flex-col md:flex-row justify-center items-center md:items-end pb-4 gap-6">
-                        {/* WhatsApp */}
-                        <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-green-400">
-                            WhatsApp: +27 123 456 789
-                        </a>
-
-                        {/* Phone */}
-                        <a href="tel:+27123456789" className="flex items-center gap-2 hover:text-blue-400">
-                            Call:  +27 123 456 789
-                        </a>
-
-                        {/* Email */}
-                        <a href="mailto:info@example.com" className="flex items-center gap-2 hover:text-red-400">
-                            Email Us: tjrshoponline@gmail.com
-                        </a>
-                    </div>
-                </div>
-            )}
+      {/* Info Bar */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 bg-purple-50 py-6 px-4 md:px-12 text-center custom-shadow-box-second">
+        <div className="flex flex-col items-center text-gray-700 hover:text-black transition">
+          <Truck className="w-8 h-8 mb-2 text-purple-600" />
+          <p className="font-semibold text-sm md:text-base">Free Shipping</p>
+          <span className="text-xs text-gray-500">On all orders</span>
         </div>
 
-    );
-}
+        <div className="flex flex-col items-center text-gray-700 hover:text-black transition">
+          <Lock className="w-8 h-8 mb-2 text-purple-600" />
+          <p className="font-semibold text-sm md:text-base">Secure Payment</p>
+          <span className="text-xs text-gray-500">100% protected checkout</span>
+        </div>
+
+        <div className="flex flex-col items-center text-gray-700 hover:text-black transition">
+          <RefreshCw className="w-8 h-8 mb-2 text-purple-600" />
+          <p className="font-semibold text-sm md:text-base">Free Return</p>
+          <span className="text-xs text-gray-500">Within 30 days</span>
+        </div>
+
+        <div className="flex flex-col items-center text-gray-700 hover:text-black transition">
+          <Clock className="w-8 h-8 mb-2 text-purple-600" />
+          <p className="font-semibold text-sm md:text-base">Available 24/7</p>
+          <span className="text-xs text-gray-500">We’re always here</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default DisplayBanner;
