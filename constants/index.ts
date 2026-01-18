@@ -309,4 +309,23 @@ export const navitems = [
   },
 ];
 
+export const items = [
+  { id: 1, name: "T-Shirt", image: "/assets/products/t-shirt.jpg",colorHex: "bg-gray-400/10"  },
+  { id: 2, name: "Jersey", image: "/assets/products/jacket.webp",colorHex: "bg-gray-400/10"  },
+  { id: 3, name: "Sweater", image: "/assets/products/sweater.jpg", colorHex: "bg-gray-400/10" },
+  { id: 4, name: "Demin", image: "/assets/products/demin.webp", colorHex: "bg-gray-400/10" },
+  { id: 5, name: "Pants", image: "/assets/products/pants.jpg", colorHex: "bg-gray-400/10" },
+  { id: 6, name: "Hoodie", image: "/assets/products/hoodiee.png", colorHex: "bg-gray-400/10" },
+  { id: 7, name: "Shirt", image: "/assets/products/shirts.jpg", colorHex: "bg-gray-400/10" },
+];
+
+export const help = [
+  { id: 1, name: "Get Help", url: "/help" },
+  { id: 2, name: "Order Status", url: "/track-order" },
+  { id: 3, name: "Shipping & Delivery", url: "/shipping-and-delivery"},
+  { id: 4, name: "Return", url: "/return" },
+  { id: 5, name: "Payment Option", url: "/payment-option" },
+  { id: 6, name: "Contact us", url: "/contact-us" },
+];
+
 

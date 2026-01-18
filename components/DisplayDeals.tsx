@@ -55,11 +55,8 @@ const DisplayDeals = () => {
     }
 
     return (
-        <div className="w-full mx-auto py-12 pt-8 px-4">
-            <h1 className="text-2xl md:text-3xl font-medium text-center mb-10">
-                🔥 Today’s Exclusive Hot Deals
-            </h1>
-
+        <div className="w-full mx-auto py-12 pt-8 px-6 md:px-8">
+            <h1 className="text-lg font-bold mb-6">Exclusive Hot Deals</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                 {deals.length > 0 ? (
                     deals.map((deal) => {
@@ -69,80 +66,61 @@ const DisplayDeals = () => {
                         return (
                             <div
                                 key={deal.id}
-                                className="group relative bg-gradient-to-br from-[#1b1b2f] to-[#2d1b3d]
-                                           p-6 rounded-3xl border border-white/10 shadow-xl"
+                                className="group p-6 rounded-xl bg-purple-50"
                             >
+                                <h2 className="text-md font-bold mb-2">
+                                    {deal.dealCoupon}
+                                </h2>
                                 {/* Percentage badge */}
-                                <div className="absolute top-6 right-6 z-10">
+                                <div className="text-gray-600">
+                                    Up to {" "}
                                     <span className="bg-gradient-to-r from-purple-600 to-pink-500 text-white 
-                                    px-4 py-1.5 rounded-full text-xs font-bold shadow-lg animate-pulse">
-                                        {deal.percentage}% OFF
+                                    px-2 py-1 rounded-md text-xs font-bold shadow-lg animate-pulse">
+                                        {deal.percentage}% 
                                     </span>
+                                    {" "} off
                                 </div>
 
                                 {/* Deal Title */}
-                                <h2 className="text-xl font-bold text-white mb-2">
-                                    {deal.dealCoupon}
-                                </h2>
 
                                 {/* Countdown */}
-                                {hasTime ? (
-                                    <div className="flex justify-center font-semibold p-1 px-6 rounded-md w-full bg-white/40 mt-4">
-                                        <div className="flex gap-2 text-lg">
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-zinc-100 font-bold">{countdown.days}</span>
-                                                <span className="text-xs text-white">Days</span>
+                                {hasTime && (
+                                    <div className="flex text-gray-600 rounded-md w-full mt-8 gap-2">
+                                        Ends in :
+                                        <div className="flex gap-2">
+                                            <div className="flex bg-black rounded p-0.5 px-2">
+                                                <span className="text-zinc-100 font-semibold">{countdown.days} DD</span>
                                             </div>
-                                            <span className="text-zinc-100">:</span>
+                                            <span className="text-gray-600">:</span>
 
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-zinc-100 font-bold">
-                                                    {countdown.hours.toString().padStart(2, "0")}
+                                            <div className="flex bg-black rounded p-0.5 px-2">
+                                                <span className="text-zinc-100 font-semibold">
+                                                    {countdown.hours.toString().padStart(2, "0")} HH
                                                 </span>
-                                                <span className="text-xs text-white">Hours</span>
                                             </div>
-                                            <span className="text-zinc-100">:</span>
+                                            <span className="text-gray-600">:</span>
 
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-zinc-100 font-bold">
-                                                    {countdown.minutes.toString().padStart(2, "0")}
+                                            <div className="flex bg-black rounded p-0.5 px-2">
+                                                <span className="text-zinc-100 font-semibold">
+                                                    {countdown.minutes.toString().padStart(2, "0")} MIN
                                                 </span>
-                                                <span className="text-xs text-white">Min</span>
                                             </div>
-                                            <span className="text-zinc-100">:</span>
+                                            <span className="text-gray-600">:</span>
 
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-zinc-100 font-bold">
-                                                    {countdown.seconds.toString().padStart(2, "0")}
+                                            <div className="flex bg-black rounded p-0.5 px-2">
+                                                <span className="text-zinc-100 font-semibold">
+                                                    {countdown.seconds.toString().padStart(2, "0")} SEC
                                                 </span>
-                                                <span className="text-xs text-white">Sec</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                ) : (
-                                    <div className="flex justify-center font-semibold p-1 px-6 rounded-md w-full bg-white/40 mt-4 py-4">
-                                        ⏳ <span className="font-semibold text-zinc-100">
-                                            This deal has no time span
-                                        </span>
-                                    </div>
                                 )}
-
-                                {/* CTA Button */}
-                                <div className="mt-6">
-                                    <button className="
-                                        w-full py-2 rounded-xl text-center text-sm font-semibold
-                                        bg-white/20 text-white border border-white/30
-                                        group-hover:bg-white/30 transition-all duration-300
-                                    ">
-                                        Grab Deal 🔥
-                                    </button>
-                                </div>
                             </div>
                         );
                     })
                 ) : (
-                    <p className="text-center text-gray-400 col-span-full">No deals available</p>
+                    <p className="text-start text-gray-400 col-span-full">No exlusive deals available</p>
                 )}
             </div>
         </div>

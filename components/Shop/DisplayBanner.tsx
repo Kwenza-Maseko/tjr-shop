@@ -25,10 +25,10 @@ const DisplayBanner = () => {
   }, []);
 
   return (
-    <div className="w-full pt-14">
+    <div className="w-full">
       {/* Banner Section */}
       {banner?.imageUrl && (
-        <div className="relative w-full h-[300px] md:h-[500px]">
+        <div className="relative w-full h-[400px] md:h-[500px]">
           <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
             <IKImage
               path={banner.imageUrl}

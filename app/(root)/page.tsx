@@ -1,6 +1,8 @@
 'use client'
-import DealTimeSpanDisplay from '@/components/DealTimeSpanDisplay';
 import DisplayDeals from '@/components/DisplayDeals';
+import DisplayProductWithDeals from '@/components/DisplayProductWithDeals';
+import FeatureCategory from '@/components/FeatureCategory';
+import Footer from '@/components/Footer';
 import DisplayBanner from '@/components/Shop/DisplayBanner'
 import config from '@/lib/config';
 import { getLatestProducts, getProducts } from '@/lib/store/product';
@@ -24,12 +26,12 @@ const HomePage = () => {
 
   return (
     <div className='w-full space-y-5'>
-      <DealTimeSpanDisplay />
       <DisplayBanner />
+      <FeatureCategory />
       <DisplayDeals />
       <div className='space-y-5 px-0  md:px-6'>
         <div className="">
-          <h1 className='text-2xl md:text-3xl text-center font-medium mb-8'>Latest on a Catalog</h1>
+          <h1 className="text-lg font-bold mb-6 px-6 md:px-2">Latest on a Catalog</h1>
           {products && products.length > 0 && (
             <ImageKitProvider
               urlEndpoint={urlEndpoint}
@@ -67,6 +69,8 @@ const HomePage = () => {
           )}
         </div>
       </div>
+      <DisplayProductWithDeals />
+      <Footer />
     </div>
   )
 }

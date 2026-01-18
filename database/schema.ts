@@ -135,7 +135,6 @@ export const announcements = pgTable("announcements", {
 
 export const cartTable = pgTable("cart", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
-
     userId: uuid("user_id")
         .notNull()
         .references(() => userTable.id, { onDelete: "cascade" }),
@@ -144,10 +143,8 @@ export const cartTable = pgTable("cart", {
         .notNull()
         .references(() => productTable.id, { onDelete: "cascade" }),
 
-    imageId: uuid("image_id")
-        .notNull()
-        .references(() => media.id, { onDelete: "cascade" }),
-
+    imageUrl: varchar("imageUrl", { length: 500 }).notNull(),
+    
     quantity: integer("quantity").notNull().default(1),
 
     priceSnapshot: numeric("price_snapshot", { precision: 10, scale: 2 }),
@@ -181,11 +178,9 @@ export const dealProducts = pgTable("deal_products", {
 });
 
 export const dealTimeSpan = pgTable("deal_time_span", {
-  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
-  dealId: uuid("deal_id")
-    .notNull()
-    .references(() => deals.id, { onDelete: "cascade" }),
-  timeSpan: timestamp("time_span", { withTimezone: true }).defaultNow(),
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    dealId: uuid("deal_id")
+        .notNull()
+        .references(() => deals.id, { onDelete: "cascade" }),
+    timeSpan: timestamp("time_span", { withTimezone: true }).defaultNow(),
 });
-
-

@@ -97,3 +97,20 @@ export interface DealProducts {
   productId: string;
   createdAt: Date | null;
 }
+
+export interface CartItem {
+  id?: string;
+  userId: string;
+  productId: string;
+  imageUrl: string;
+  quantity: number;
+
+  priceSnapshot: string;              // ✅ STRING
+  discountSnapshot?: string | null;   // ✅ STRING
+
+  selectedOptions?: any | null;
+  isActive?: boolean;
+  createdAt?: Date | null;
+  updatedAt?: Date | null;
+}
+

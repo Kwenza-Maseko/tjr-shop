@@ -40,13 +40,7 @@ const ClientNavbar = ({ session }: SidebarProps) => {
         <nav className='bg-white p-3 md:px-6 fixed top-0 left-0 right-0 z-50 border-b border-zinc-200'>
             <div className='flex gap-3 justify-between items-center'>
                 <Link href={"/"}>
-                    <Image
-                        src={"/assets/digitalmove-logo.png"}
-                        width={40}
-                        height={40}
-                        alt='logo'
-                        className='invert'
-                    />
+                    <p className='font-black text-lg'>TJR.<span className='text-xs text-purple-600'>ONLINE</span></p>
                 </Link>
 
                 <ul className=" space-x-8 hidden md:flex">
@@ -90,7 +84,9 @@ const ClientNavbar = ({ session }: SidebarProps) => {
                 <div className="flex gap-3 items-center">
                     {session?.user && (
                         <div className="flex items-center gap-3 relative">
-                            <ShoppingCart className="w-6 h-6" />
+                            <Link href={"/cart"}>
+                                <ShoppingCart className="w-6 h-6" />
+                            </Link>
                             <Bell className="w-6 h-6" />
                             <div className="w-[30px] h-[30px] rounded-full flex items-center justify-center bg-gray-300 border border-gray-500 text-xs font-bold cursor-pointer"
                                 onClick={() => {
