@@ -1,6 +1,6 @@
 'use server';
 
-import { signIn } from "@/userAuth"; // ✅ user auth instance
+import { signIn } from "@/userAuth"; // 
 import { db } from "@/database/drizzle";
 import { userTable } from "@/database/schema";
 import { AuthCredentails, User } from "@/types";

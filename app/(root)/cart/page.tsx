@@ -4,6 +4,20 @@ import { IKImage, ImageKitProvider } from "imagekitio-next";
 import { useState, useEffect, JSXElementConstructor, ReactElement, ReactNode, ReactPortal } from "react";
 import { toast } from "sonner";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import CheckoutPage from "@/components/CheckoutPage";
+import { useRouter } from "next/navigation";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 
 const { urlEndpoint, publicKey } = config.env.imagekit;
 
@@ -15,8 +29,8 @@ interface CartItem {
     imageUrl: string;
     quantity: number;
 
-    priceSnapshot: string;              // ✅ STRING
-    discountSnapshot?: string | null;   // ✅ STRING
+    priceSnapshot: string;
+    discountSnapshot?: string | null;
 
     selectedOptions?: any | null;
     isActive?: boolean;
@@ -26,7 +40,9 @@ interface CartItem {
 const Cart = () => {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showCheckout, setShowCheckout] = useState(false);
 
+    const router = useRouter();
     useEffect(() => {
         const fetchCart = async () => {
             try {
@@ -92,7 +108,7 @@ const Cart = () => {
         if (!item) return;
 
         if (item.quantity === 1) {
-            handleDelete(cartId);
+            handleDeleteItem(cartId);
             return;
         }
 
@@ -126,7 +142,7 @@ const Cart = () => {
         }
     };
 
-    const handleDelete = async (cartId: string) => {
+    const handleDeleteItem = async (cartId: string) => {
         let snapshot: typeof cartItems;
 
         setCartItems(prev => {
@@ -151,7 +167,23 @@ const Cart = () => {
         }
     };
 
-    // Calculate the subtotal for a single cart item
+    const handleDeleteCart = async(userId: string) => {
+        try {
+            const res = await fetch("/api/cart/delete-all-items", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cartItemId: userId }),
+            });
+
+            if (!res.ok) throw new Error("Request failed");
+
+            const data = await res.json();
+            if (!data.success) throw new Error("Delete failed");
+        } catch (error) {
+            toast.error("Failed to remove item");
+        }
+    }
+
     // Calculate the subtotal for a single cart item
     const getItemSubtotal = (item: CartItem) => {
         const price = Number(item.priceSnapshot); // original price
@@ -186,12 +218,29 @@ const Cart = () => {
         <div className='mt-8 px-6 md:px-8'>
             <div className="flex justify-between items-center mb-6">
                 <p className="text-lg font-bold">My Cart</p>
-                <button
-                    className="text-xs text-gray-600 hover:underline"
-                    onClick={() => setCartItems([])} // optional clear all
-                >
-                    Clear All
-                </button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <button
+                            className="text-xs text-gray-600 hover:underline"
+                            onClick={() => handleDeleteCart("hdhhhdhjhd")}
+                        >
+                            Clear All
+                        </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure you want to remove all items?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently remove your items
+                                from your cart.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => setCartItems([])}>Continue</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
 
             <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
@@ -245,7 +294,7 @@ const Cart = () => {
                                     <div className="flex items-center gap-3 mt-6">
                                         {item.quantity === 1 ? (
                                             <button
-                                                onClick={() => handleDelete(item.id)}
+                                                onClick={() => handleDeleteItem(item.id)}
                                                 className="p-2 rounded-full border hover:bg-red-50"
                                             >
                                                 <Trash2 size={16} className="text-red-600" />
@@ -296,13 +345,18 @@ const Cart = () => {
                     </div>
 
                     <button
+                        onClick={() => {
+                            sessionStorage.setItem("checkout_cart", JSON.stringify(cartItems));
+                            sessionStorage.setItem("checkout_total", JSON.stringify(cartSubtotal));
+                            router.push("/checkout");
+                        }}
                         className="bg-black text-white px-6 py-3 rounded-xl font-semibold w-full"
                     >
-                        Checkout
+                        Proceed to Checkout
                     </button>
+
                 </div>
             </div>
-
         </div>
     )
 }

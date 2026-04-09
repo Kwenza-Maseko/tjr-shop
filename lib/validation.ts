@@ -49,6 +49,13 @@ export const productValidation = z.object({
     z.array(z.string().nullable()),
     z.record(z.any())
   ]).optional().nullable(),
-  
+
   brand: z.string().nullable(),
+});
+
+export const checkoutContactDetails = z.object({
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone number is too short"),
+  firstname: z.string().min(2, "First name must be at least 2 characters"),
+  lastname: z.string().min(2, "Last name must be at least 2 characters"),
 });
