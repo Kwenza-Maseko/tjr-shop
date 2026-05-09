@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Bell, Search, ShoppingCart, X } from 'lucide-react';
+import { Bell, Crown, Search, Shield, ShoppingCart, X } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
@@ -8,11 +8,15 @@ import Notifications from './Notifications';
 import { ungrantedAccessAdmins } from '@/lib/adminDetails/users';
 import { AdminParams } from '@/types';
 
-const Navbar = () => {
+
+type AdminRole = "ADMIN" | "SUPER ADMIN" | null;
+
+const Navbar = ({ adminRole }: { adminRole: AdminRole }) => {
   const pathname = usePathname();
   const [openNotifications, setOpenNotifications] = useState(false);
   const [admins, setAdmins] = useState<AdminParams[]>([]);
   const [loading, setLoading] = useState(false);
+  const role = adminRole; // now it's "ADMIN" | "SUPERADMIN"
 
   useEffect(() => {
     const fetchAdmins = async () => {
@@ -30,49 +34,57 @@ const Navbar = () => {
 
   const hasUngranted = admins.length > 0;
 
+  const label =
+    pathname === "/admin"
+      ? "Dashboard"
+      : pathname
+        .replace("/admin", "")
+        .split("/")
+        .filter(Boolean)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" / ");
+
+  const isSuperAdmin = adminRole === 'SUPER ADMIN'
+
   return (
     <div>
-      <div className='py-2.5 px-4 backdrop-blur-md fixed top-0 left-0 md:left-[240px] w-full md:w-[calc(100%-240px)] z-40 border-b bg-zinc-50'>
+      <div className='py-2 px-4 backdrop-blur-md fixed top-0 left-0 md:left-[240px] w-full md:w-[calc(100%-240px)] z-40 border-b bg-zinc-50'>
         <div className="flex justify-between items-center gap-2">
           {/* Title */}
-          <div className="font-bold text-gray-700 text-md w-full">
-            Overview
-          </div>
-
-          {/* Search bar */}
-          <div className="flex items-center gap-2 bg-white px-2 rounded w-full custom-light-shadow-box">
-            <Search className="w-4 h-4 text-gray-600" />
-            <Input className="bg-white px-2 py-1 border-none outline-none shadow-none focus:outline-none focus:ring-0 w-[280px]" />
-            <div className="text-xs p-1 my-2 bg-gray-200 rounded w-[40px] text-center">Ctrl K</div>
+          <div className="font-bold text-md w-full">
+            <p className='tracking-wide uppercase mb-1'>{label}</p>
+            <div className={`flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full border w-fit
+              ${isSuperAdmin
+                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                : 'bg-green-50 text-green-600 border-green-200'}`}>
+              {isSuperAdmin
+                ? <Crown className="w-3 h-3" />
+                : <Shield className="w-3 h-3" />}
+              {role ?? 'Admin'}
+            </div>
           </div>
 
           {/* Right buttons */}
-          <div className="flex justify-end w-full">
-            <div className="flex gap-3">
+          {role == "SUPER ADMIN" && (
+            <div className="flex justify-end w-full">
+              <div className="flex gap-3">
+                {/* Notifications */}
+                <div
+                  className="rounded-full flex items-center gap-2 relative cursor-pointer px-3 py-1.5 bg-black text-white"
+                  onClick={() => setOpenNotifications(true)}
 
-              {/* Cart */}
-              <div className="rounded flex items-center gap-2 relative cursor-pointer px-2 py-1 bg-teal-500 text-white border border-teal-100">
-                <ShoppingCart className="w-4 h-4" />
-                <p>New Orders</p>
+                >
+                  <Bell className="w-4 h-4" />
 
-                <div className="w-2.5 h-2.5 bg-red-500 absolute left-3.5 top-1.5 rounded-full border-2 border-teal-500" />
-              </div>
-
-              {/* Notifications */}
-              <div
-                className="rounded flex items-center gap-2 relative cursor-pointer px-2 py-1 bg-teal-500 text-white border border-teal-100"
-                onClick={() => setOpenNotifications(true)}
-
-              >
-                <Bell className="w-4 h-4" />
-
-                <p>Notifications</p>
-                {hasUngranted && (
-                  <div className="w-2.5 h-2.5 bg-red-500 absolute left-3.5 top-1.5 rounded-full border-2 border-teal-500" />
-                )}
+                  <p>Notifications</p>
+                  {hasUngranted && (
+                    <div className="w-3 h-3 bg-red-500 absolute right-1 -top-1.5 rounded-full border border-white" />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
         </div>
       </div>
 
@@ -87,7 +99,7 @@ const Navbar = () => {
             className="fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-50 transform animate-slideIn"
           >
             <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-md font-semibold">Notifications</h2>
+              <h2 className="text-md font-medium tracking-widest uppercase">Notifications</h2>
               <button onClick={() => setOpenNotifications(false)}>
                 <X className="w-4 h-4" />
               </button>
@@ -95,7 +107,7 @@ const Navbar = () => {
             <div className="p-4">
               <Notifications
                 admins={admins}
-                setAdmins={setAdmins} // allow Notifications to update state
+                setAdmins={setAdmins}
                 loading={loading}
               />
             </div>

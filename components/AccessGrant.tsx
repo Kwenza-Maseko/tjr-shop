@@ -34,7 +34,7 @@ const AccessGrant: React.FC<AccessGrantProps> = ({ admin, onGranted }) => {
             <button
                 onClick={grantAccess}
                 disabled={loading}
-                className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                className="bg-blue-500 text-white px-2 py-1 rounded-full mt-4"
             >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Grant Access'}
             </button>

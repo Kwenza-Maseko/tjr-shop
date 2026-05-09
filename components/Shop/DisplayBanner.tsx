@@ -45,25 +45,25 @@ const DisplayBanner = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 bg-purple-50 py-6 px-4 md:px-12 text-center custom-shadow-box-second">
         <div className="flex flex-col items-center text-gray-700 hover:text-black transition">
           <Truck className="w-8 h-8 mb-2 text-purple-600" />
-          <p className="font-semibold text-sm md:text-base">Free Shipping</p>
+          <p className="font-medium text-sm tracking-widest uppercase ">Free Shipping</p>
           <span className="text-xs text-gray-500">On all orders</span>
         </div>
 
         <div className="flex flex-col items-center text-gray-700 hover:text-black transition">
           <Lock className="w-8 h-8 mb-2 text-purple-600" />
-          <p className="font-semibold text-sm md:text-base">Secure Payment</p>
+          <p className="font-medium text-sm tracking-widest uppercase ">Secure Payment</p>
           <span className="text-xs text-gray-500">100% protected checkout</span>
         </div>
 
         <div className="flex flex-col items-center text-gray-700 hover:text-black transition">
           <RefreshCw className="w-8 h-8 mb-2 text-purple-600" />
-          <p className="font-semibold text-sm md:text-base">Free Return</p>
+          <p className="font-medium text-sm tracking-widest uppercase ">Free Return</p>
           <span className="text-xs text-gray-500">Within 30 days</span>
         </div>
 
         <div className="flex flex-col items-center text-gray-700 hover:text-black transition">
           <Clock className="w-8 h-8 mb-2 text-purple-600" />
-          <p className="font-semibold text-sm md:text-base">Available 24/7</p>
+          <p className="font-medium text-sm tracking-widest uppercase ">Available 24/7</p>
           <span className="text-xs text-gray-500">We’re always here</span>
         </div>
       </div>

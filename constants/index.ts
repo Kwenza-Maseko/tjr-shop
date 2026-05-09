@@ -8,7 +8,8 @@ import {
   BarChart2,
   BoxIcon,
   Settings2Icon,
-  ChartBarDecreasingIcon
+  ChartBarDecreasingIcon,
+  ShoppingBag
 } from "lucide-react";
 
 export const FIELD_NAMES = {
@@ -45,51 +46,67 @@ export const YourStoreNavLinks = [
     urlName: "overview",
     path: "/admin",   // instead of ""
     icon: Home,
+    role: "ADMIN"
   },
   {
     urlName: "Products",
     path: "/admin/products",
     icon: Package,
+    role: "ADMIN"
   },
   {
     urlName: "Analytics",
     path: "/admin/analytics",
     icon: PieChartIcon,
+    role: "ADMIN"
   },
   {
     urlName: "Inventory",
     path: "/admin/inventory",
     icon: BoxIcon,
+    role: "ADMIN"
+  },
+  {
+    urlName: "cart",
+    path: "/admin/cart",
+    icon: ShoppingBag,
+    role: "ADMIN"
   },
   {
     urlName: "orders",
     path: "/admin/orders",
     icon: ShoppingCart,
+    role: "ADMIN"
   },
   {
     urlName: "Sales",
     path: "/admin/sales",
     icon: BarChart2,
+    role: "SUPER ADMIN"
   },
   {
     urlName: "Customers",
     path: "/admin/customers",
     icon: Users,
+    role: "SUPER ADMIN"
   },
   {
     urlName: "announcement",
     path: "/admin/announcements",
     icon: Megaphone,
+    role: "SUPER ADMIN"
   },
   {
     urlName: "settings",
     path: "/admin/settings",
     icon: Settings2Icon,
+    role: "SUPER ADMIN"
   },
   {
     urlName: "discount",
     path: "/admin/discount",
     icon: ChartBarDecreasingIcon,
+    role: "SUPER ADMIN"
   },
 ];
 

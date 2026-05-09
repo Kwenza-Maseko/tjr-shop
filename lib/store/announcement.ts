@@ -2,7 +2,7 @@
 
 import { db } from "@/database/drizzle";
 import { announcements } from "@/database/schema";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { RotateCwSquare } from "lucide-react";
 
 
@@ -48,22 +48,17 @@ export const createOrUpdateAnnouncement = async (
   }
 };
 
-
-
-export const getAnnouncements = async (): Promise<
-  { id: string; announcement: string; createdAt: Date | null }[] | null
-> => {
-  const result = await db
-    .select()
-    .from(announcements);
-
-  if (result.length === 0) return null;
-
-  return result.map((row) => ({
-    id: row.id,
-    announcement: row.announcement,
-    createdAt: row.createdAt
-  }));
+export async function getAnnouncements() {
+  try {
+    const data = await db
+      .select()
+      .from(announcements)
+      .orderBy(announcements.createdAt)
+    return data
+  } catch (error) {
+    console.error('getProducts error:', error)
+    return []
+  }
 };
 
 

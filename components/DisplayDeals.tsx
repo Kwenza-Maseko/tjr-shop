@@ -56,7 +56,7 @@ const DisplayDeals = () => {
 
     return (
         <div className="w-full mx-auto py-12 pt-8 px-6 md:px-8">
-            <h1 className="text-lg font-bold mb-6">Exclusive Hot Deals</h1>
+            <h1 className="text-lg mb-6 px-6 md:px-2 uppercase tracking-widest">Exclusive Hot Deals</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                 {deals.length > 0 ? (
                     deals.map((deal) => {

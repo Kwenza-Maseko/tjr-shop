@@ -27,13 +27,16 @@ const Notifications: React.FC<NotificationsProps> = ({ admins, setAdmins, loadin
       ) : admins.length > 0 ? (
         <ul className='space-y-4'>
           {admins.map((admin) => (
-            <li key={admin.id} className="flex gap-2 items-center">
-              <span>{admin.fullName} -</span>
-              <div className="bg-red-50 text-red-500 p-1 rounded">
-                Request Access
+            <li key={admin.id} className="flex gap-2">
+              <div>
+                <span>{admin.fullName}</span>
+              <div className="bg-red-50 text-red-500 border border-red-300 py-1 px-2 text-[10px] rounded-full mt-1">
+                Request Admin Access
               </div>
+              </div>
+              
               <button
-                className="ml-auto text-blue-500"
+                className="ml-auto text-blue-500 text-xs"
                 onClick={() => handleOpenGrant(admin)}
               >
                 Review
@@ -53,7 +56,7 @@ const Notifications: React.FC<NotificationsProps> = ({ admins, setAdmins, loadin
           />
           <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-50 transform animate-slideIn">
             <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-md font-semibold">Grant Access</h2>
+              <h2 className="text-md font-medium tracking-widest uppercase">Grant Access</h2>
               <button onClick={() => setOpenGrantPanel(false)}>
                 <X className="w-4 h-4" />
               </button>

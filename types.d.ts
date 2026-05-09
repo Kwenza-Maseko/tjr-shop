@@ -50,32 +50,27 @@ export interface MediaParams {
   createdAt: Date | null;
 }
 export interface ProductParams {
-  id?: string;
-  productName: string;
-  imageUrl: string;
-  description: string | null;
-  productTarget: string;
-  productType: string | null;
-  color: string | null;
-  price: number;
-  discountPrice: number | null;
-  stock: number; // default 0 at runtime
-  sku: string;
-
-  category: string | null;
-  tags: string | null;
-
-  weight: number | null;
-  dimensions: string | null;
-
-  rating: number; // default 0 at runtime
-  reviewCount: number; // default 0 at runtime
-
-  isActive: boolean; // default true at runtime
-  relatedProducts: (string | undefined)[] | null; // JSONB array
-  variants: Record<string, any> | null; // JSONB object
-
-  brand: string | null;
+  id?: string
+  productName: string
+  imageUrl: string
+  description: string | null
+  productTarget: string
+  productType: string | null
+  color: string | null
+  price: number
+  discountPrice: number | null
+  stock: number
+  sku: string
+  category: string | null
+  tags: string | null
+  weight: number | null
+  dimensions: string | null
+  rating: number
+  reviewCount: number
+  isActive: boolean
+  relatedProducts: string[] | null
+  variants: Record<string, string[]> | null 
+  brand: string | null
 }
 
 export interface Deals {

@@ -198,3 +198,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.group:hover .group-hover\:block {
+  display: block;
+}

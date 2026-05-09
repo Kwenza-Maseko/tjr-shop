@@ -3,8 +3,8 @@ import { Lato } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
-import ClientNavbar from "@/components/ClientNavbar";
 import { DealsProvider } from "@/components/providers/DealContext";
+import { ProviderWrapper } from "@/components/providers/AuthProvider";
 
 const lato = Lato({
   subsets: ["latin"],
@@ -21,14 +21,16 @@ export const metadata: Metadata = {
 const RootLayout = async ({ children }: { children: ReactNode }) => {
   return (
     <html lang="en">
-      <DealsProvider>
-        <body
-          className={`${lato.className} antialiased font-medium text-sm bg-[#fafaff]`}
-        >
-          <Toaster />
-          {children}
-        </body>
-      </DealsProvider>
+      <ProviderWrapper>
+        <DealsProvider>
+          <body
+            className={`${lato.className} antialiased font-medium text-sm bg-[#fafaff]`}
+          >
+            <Toaster />
+            {children}
+          </body>
+        </DealsProvider>
+      </ProviderWrapper>
     </html>
   );
 };

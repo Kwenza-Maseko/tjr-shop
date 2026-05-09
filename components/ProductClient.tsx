@@ -1,70 +1,50 @@
 'use client';
 
-import { redirect, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ProductParams } from "@/types";
-import { getStoreProducts } from "@/lib/store/product"; // fallback fetch
 import { useProductStore } from "@/lib/store/productStore";
 import config from "@/lib/config";
 import { IKImage, ImageKitProvider } from "imagekitio-next";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createOrUpdateCart } from "@/lib/store/cart";
-import { auth } from '@/userAuth';
+import { getProductById, ProductWithDeal } from "@/lib/store/deals";
+import { resolveEffectivePrice } from "@/lib/price";
+import { Tag } from "lucide-react";
 
 const { urlEndpoint, publicKey } = config.env.imagekit;
 
 const ProductClient = ({ userId }: { userId: string }) => {
 
-    const { id } = useParams<{ id: string }>();
-
-    const { getProductById, selectedProduct } = useProductStore();
-
-    const [product, setProduct] = useState<ProductParams | null>(null);
-
-    // 🆕 state for user selections
+    const { id } = useParams<{ id: string }>()
+    const { selectedProduct } = useProductStore()
+    const [product, setProduct] = useState<ProductWithDeal | null>(null)
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
+
     useEffect(() => {
-        let found = getProductById(id);
-        if (found) {
-            setProduct(found);
-        } else if (selectedProduct?.id === id) {
-            setProduct(selectedProduct);
-        } else {
-            (async () => {
-                const data = await getStoreProducts();
-                const fetched = data?.find((p) => p.id === id) ?? null;
-                setProduct(fetched);
-            })();
+        if (selectedProduct?.id === id) {
+            setProduct(selectedProduct as ProductWithDeal)
+            return
         }
-    }, [id, getProductById, selectedProduct]);
+        getProductById(id).then(data => {
+            if (data) setProduct(data)
+        })
+    }, [id, selectedProduct])
 
-    const getPercentage = (
-        discountPrice?: number | null,
-        price?: number | null
-    ): number | null => {
-        if (!discountPrice || !price || price <= 0) return null;
-        const discount = ((Number(price) - Number(discountPrice)) / Number(price)) * 100;
-        return Math.round(discount);
-    };
+    if (!product) return <p className="p-6 text-gray-500">Loading product...</p>
 
-    const getDiscount = (
-        discountPrice?: number | null,
-        price?: number | null
-    ): number | null => {
-        if (!discountPrice || !price || price <= 0) return null;
-        const discount = Number(price) - Number(discountPrice);
-        return Math.round(discount);
-    };
+    const { effectivePrice, originalPrice, badge } = resolveEffectivePrice(
+        product.price,
+        product.discountPrice,
+        product.dealPercentage
+    )
+    const hasDiscount = effectivePrice < originalPrice
+    const pctOff = hasDiscount
+        ? Math.round((1 - effectivePrice / originalPrice) * 100)
+        : 0
 
-    const discountAmount = getDiscount(product?.discountPrice ?? undefined, product?.price ?? undefined);
-    const discountPercentage = getPercentage(product?.discountPrice ?? undefined, product?.price ?? undefined);
-
-    if (!product) return <p className="p-6 text-gray-500">Loading product...</p>;
-
-    // 🧠 Add to Cart handler
     const handleAddToCart = async () => {
 
         if (!selectedColor || !selectedSize) {
@@ -89,13 +69,10 @@ const ProductClient = ({ userId }: { userId: string }) => {
                 imageUrl: product.imageUrl,
                 quantity: 1,
 
-                // numeric → string (Drizzle)
-                priceSnapshot: Number(
-                    product.price
-                ).toFixed(2),
+                priceSnapshot: originalPrice.toFixed(2),
 
-                discountSnapshot: product.discountPrice
-                    ? Number(product.discountPrice).toFixed(2)
+                discountSnapshot: effectivePrice
+                    ? effectivePrice.toFixed(2)
                     : null,
 
                 selectedOptions: {
@@ -111,16 +88,13 @@ const ProductClient = ({ userId }: { userId: string }) => {
         }
     };
 
-
-
-
     return (
         <div className="w-full p-6">
             <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
                 <div className="flex flex-col lg:flex-row  gap-8 md:gap-18 mx-auto">
                     <div className="block lg:hidden">
                         <h1 className="text-xl font-semibold">{product.productName}</h1>
-                        <p className="text-gray-600 capitalize">{product.productType}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{product.productType}</p>
                     </div>
                     <div className="w-full h-full md:w-[350px] md:h-[350px]">
                         <IKImage
@@ -138,32 +112,31 @@ const ProductClient = ({ userId }: { userId: string }) => {
                             <div >
                                 <div className="lg:block hidden">
                                     <h1 className="text-xl font-semibold">{product.productName}</h1>
-                                    <p className="text-gray-600 capitalize">{product.productType}</p>
+                                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{product.productType}</p>
                                 </div>
 
                                 <div className="flex gap-4 items-end">
-                                    {discountPercentage !== null && (
-                                        <p className="text-green-600 text-lg md:text-2xl ">
-                                            -{discountPercentage}%
-                                        </p>
+                                    {hasDiscount && (
+                                        <p className="text-green-600 text-lg md:text-2xl">-{pctOff}%</p>
                                     )}
-                                    {discountAmount !== null ? (
-                                        <div className="text-xs font-semibold flex gap-0.5 mt-2">
-                                            <p className="mt-1 text-xs">R</p>
-                                            <p className="text-lg md:text-2xl ">{discountAmount}</p>
-                                        </div>
-                                    ) : (
-                                        <div className="text-xs font-semibold flex gap-0.5 mt-2">
-                                            <p className="mt-1  text-xs">R</p>
-                                            <p className="text-lg md:text-2xl ">{product.price}</p>
-                                        </div>
+                                    {/* Deal badge */}
+                                    {badge === 'deal' && product.dealCoupon && (
+                                        <span className="flex items-center gap-1 text-[11px] bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">
+                                            <Tag className="w-3 h-3" />
+                                            {product.dealCoupon}
+                                        </span>
                                     )}
+                                    <div className="text-xs font-semibold flex gap-0.5 mt-2">
+                                        <p className="mt-1 text-xs">R</p>
+                                        <p className="text-lg md:text-2xl">{effectivePrice}</p>
+                                    </div>
                                 </div>
-                                {discountAmount !== null && (
-                                    <p className="text-xs text-zinc-600">Actual Price: <span className="font-semibold line-through">R{product.price}</span>
+
+                                {hasDiscount && (
+                                    <p className="text-xs text-zinc-600">
+                                        Original: <span className="font-semibold line-through">R{originalPrice}</span>
                                     </p>
                                 )}
-
 
                                 <p
                                     className={`${product.isActive ? "text-green-900 bg-green-200" : "text-red-900 bg-red-200"
@@ -176,16 +149,47 @@ const ProductClient = ({ userId }: { userId: string }) => {
                             <div className="w-full h-[1px] bg-gray-300 " />
 
                             {/* 🎨 Color Selection */}
+                            {/* 🎨 Color Selection */}
                             <div>
-                                <h3 className="text-md font-semibold mb-4">Color</h3>
-                                <div
-                                    onClick={() => setSelectedColor(product.color ?? null)}
-                                    className={`w-[30px] h-[30px] rounded-full border-2 cursor-pointer transition ${selectedColor === product.color
-                                        ? "border-black scale-110"
-                                        : "border-gray-300"
-                                        }`}
-                                    style={{ background: product.color?.toLowerCase() }}
-                                />
+                                <h3 className="text-md font-semibold mb-4">
+                                    Color
+                                    {selectedColor && (
+                                        <span className="ml-2 text-sm font-normal text-zinc-500 capitalize">
+                                            — {selectedColor}
+                                        </span>
+                                    )}
+                                </h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {(() => {
+                                        // Get colors from variants if available, fall back to product.color
+                                        const variantColors = product.variants?.colors as string[] | undefined
+                                        const colors = variantColors?.length
+                                            ? variantColors
+                                            : product.color
+                                                ? [product.color]
+                                                : []
+
+                                        if (colors.length === 0) return (
+                                            <p className="text-xs text-zinc-400">No colors available</p>
+                                        )
+
+                                        return colors.map(color => (
+                                            <div
+                                                key={color}
+                                                title={color}
+                                                onClick={() => setSelectedColor(color)}
+                                                className={`w-8 h-8 rounded-full border-2 cursor-pointer transition-all
+            ${selectedColor === color
+                                                        ? 'border-black scale-110 shadow-md'
+                                                        : 'border-zinc-200 hover:border-zinc-400'
+                                                    }
+            ${color.toLowerCase() === 'white' ? 'outline outline-1 outline-zinc-200' : ''}
+          `}
+                                                style={{ backgroundColor: color.toLowerCase() }}
+                                            />
+                                        ))
+                                    })()}
+                                </div>
                             </div>
 
                             <div className="space-y-2">
@@ -233,8 +237,8 @@ const ProductClient = ({ userId }: { userId: string }) => {
                                         </div>
 
                                         <div className="capitalize space-y-2">
-                                            <p>{product.productTarget}</p>
                                             <p>{product.productType}</p>
+                                            <p>{product.productTarget}</p>
                                             <p>{product.brand == null ? "No Name" : product.brand}</p>
                                             <p>{product?.weight == null ? "Not Specified" : product.weight}</p>
                                         </div>

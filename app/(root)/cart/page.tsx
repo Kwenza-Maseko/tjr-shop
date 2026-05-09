@@ -3,7 +3,7 @@ import config from "@/lib/config";
 import { IKImage, ImageKitProvider } from "imagekitio-next";
 import { useState, useEffect, JSXElementConstructor, ReactElement, ReactNode, ReactPortal } from "react";
 import { toast } from "sonner";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Minus, Plus, RefreshCw, ShieldCheck, Trash2, Lock, Tag } from "lucide-react";
 import CheckoutPage from "@/components/CheckoutPage";
 import { useRouter } from "next/navigation";
 import {
@@ -167,7 +167,7 @@ const Cart = () => {
         }
     };
 
-    const handleDeleteCart = async(userId: string) => {
+    const handleDeleteCart = async (userId: string) => {
         try {
             const res = await fetch("/api/cart/delete-all-items", {
                 method: "DELETE",
@@ -184,179 +184,164 @@ const Cart = () => {
         }
     }
 
-    // Calculate the subtotal for a single cart item
     const getItemSubtotal = (item: CartItem) => {
-        const price = Number(item.priceSnapshot); // original price
-        const discount = item.discountSnapshot ? Number(item.discountSnapshot) : 0; // discount amount
-
-        const finalPrice = price - discount; // actual price after discount
+        const price = Number(item.priceSnapshot);
+        const discount = item.discountSnapshot ? Number(item.discountSnapshot) : 0;
+        let finalPrice = 0
+        if (discount > 0) {
+            finalPrice = discount;
+        }
+        if (discount < 0) {
+            finalPrice = price;
+        }
         return finalPrice * item.quantity;
     };
 
-    // Calculate total cart subtotal
     const cartSubtotal = cartItems.reduce(
         (total, item) => total + getItemSubtotal(item),
         0
     );
 
-    const getDiscount = (priceSnapshot?: string | null, discountSnapshot?: string | null): number | null => {
-        if (!priceSnapshot || !discountSnapshot) return null;
+    const saved = (item: CartItem) => {
+        const price = Number(item.priceSnapshot);
+        const discount = item.discountSnapshot ? Number(item.discountSnapshot) : 0;
+        const finalSavedAmount = price - discount;
 
-        const price = Number(priceSnapshot);
-        const discount = Number(discountSnapshot);
-
-        if (isNaN(price) || isNaN(discount) || price <= 0) return null;
-
-        return Math.round(price - discount);
-    };
-
+        return finalSavedAmount * item.quantity
+    }
 
     if (loading) return <p className="p-6 text-gray-500">Loading cart...</p>;
     if (cartItems.length === 0) return <p className="p-6 text-gray-500">Your cart is empty</p>;
 
     return (
         <div className='mt-8 px-6 md:px-8'>
-            <div className="flex justify-between items-center mb-6">
-                <p className="text-lg font-bold">My Cart</p>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <button
-                            className="text-xs text-gray-600 hover:underline"
-                            onClick={() => handleDeleteCart("hdhhhdhjhd")}
-                        >
-                            Clear All
-                        </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure you want to remove all items?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This action cannot be undone. This will permanently remove your items
-                                from your cart.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => setCartItems([])}>Continue</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            </div>
-
             <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
-                <div className="space-y-4 pb-32">
-                    {cartItems.map((item) => {
-                        // Calculate discount for this specific item
-                        const discountAmount = getDiscount(item.priceSnapshot, item.discountSnapshot);
+                <div className="space-y-4 pb-32 ">
+                    {/* Items list */}
+                    <div className="space-y-3 pb-4 md:pb-0">
+                        <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-4">
+                            Your cart · <span className="text-foreground">{cartItems.length} items</span>
+                        </p>
 
-                        return (
-                            <div
-                                key={item.id}
-                                className="flex gap-4 p-4 bg-white rounded-2xl shadow-sm"
-                            >
-                                <IKImage
-                                    path={item.imageUrl || ""}
-                                    alt={item.productName || "Product Image"}
-                                    className="w-20 h-20 object-cover rounded-xl"
-                                    width={80}
-                                    height={80}
-                                />
+                        {cartItems.map(item => {
+                            const effectivePrice = item.discountSnapshot
+                                ? Number(item.discountSnapshot)
+                                : Number(item.priceSnapshot)
+                            const hasDiscount = item.discountSnapshot &&
+                                Number(item.discountSnapshot) < Number(item.priceSnapshot)
+                            const pctOff = hasDiscount
+                                ? Math.round((1 - Number(item.discountSnapshot) / Number(item.priceSnapshot)) * 100)
+                                : 0
 
-                                <div className="flex-1">
-                                    <p className="font-semibold text-gray-800">
-                                        {item.productName}
-                                    </p>
+                            return (
+                                <div key={item.id} className="flex gap-4 p-4 bg-white border border-border/50 rounded-xl">
+                                    {/* Image */}
+                                    <div className="w-20 h-20 rounded-lg bg-muted border border-border/50 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                        <IKImage path={item.imageUrl || ""} alt={item.productName || ""} width={80} height={80} className="object-cover w-full h-full" />
+                                    </div>
 
-                                    <p className="text-xs text-gray-500 capitalize">
-                                        {item.selectedOptions &&
-                                            Object.entries(item.selectedOptions)
-                                                .map(([k, v]) => `${k}: ${v}`)
-                                                .join(", ")}
-                                    </p>
-
-                                    {/* Show discount if exists */}
-                                    {discountAmount !== null ? (
-                                        <>
-                                            <p className="text-sm font-semibold text-gray-600 mt-2">
-                                                R{discountAmount}
-                                            </p>
-                                            <p className="text-xs text-zinc-600">
-                                                Actual Price: <span className="font-semibold line-through">R{item.priceSnapshot}</span>
-                                            </p>
-                                        </>
-                                    ) : (
-                                        <p className="text-sm font-semibold text-gray-600 mt-2">
-                                            R{item.priceSnapshot}
+                                    {/* Body */}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium truncate">{item.productName}</p>
+                                        <p className="text-[11px] text-muted-foreground mt-0.5 uppercase tracking-wide">
+                                            {item.selectedOptions && Object.entries(item.selectedOptions).map(([k, v]) => `${k}: ${v}`).join(" · ")}
                                         </p>
-                                    )}
 
-                                    {/* Quantity controls */}
-                                    <div className="flex items-center gap-3 mt-6">
-                                        {item.quantity === 1 ? (
-                                            <button
-                                                onClick={() => handleDeleteItem(item.id)}
-                                                className="p-2 rounded-full border hover:bg-red-50"
-                                            >
-                                                <Trash2 size={16} className="text-red-600" />
+                                        {/* Price */}
+                                        <div className="flex items-baseline gap-2 mt-2">
+                                            <span className="text-sm font-semibold">R{(effectivePrice * item.quantity).toFixed(2)}</span>
+                                            {hasDiscount && (
+                                                <>
+                                                    <span className="text-xs text-muted-foreground line-through">
+                                                        R{(Number(item.priceSnapshot) * item.quantity).toFixed(2)}
+                                                    </span>
+                                                    <span className="text-[10px] font-semibold bg-red-50 text-red-700 border border-red-100 px-1.5 py-0.5 rounded-full">
+                                                        -{pctOff}%
+                                                    </span>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        {/* Qty controls */}
+                                        <div className="flex items-center gap-2 mt-3">
+                                            {item.quantity === 1 ? (
+                                                <button onClick={() => handleDeleteItem(item.id)} className="w-7 h-7 rounded-full border border-red-200 hover:bg-red-50 flex items-center justify-center transition-colors">
+                                                    <Trash2 className="w-3 h-3 text-red-500" />
+                                                </button>
+                                            ) : (
+                                                <button onClick={() => handleDecrease(item.id)} className="w-7 h-7 rounded-full border border-border hover:bg-muted flex items-center justify-center transition-colors">
+                                                    <Minus className="w-3 h-3" />
+                                                </button>
+                                            )}
+                                            <span className="text-sm font-medium w-5 text-center">{item.quantity}</span>
+                                            <button onClick={() => handleIncrease(item.id)} className="w-7 h-7 rounded-full border border-border hover:bg-muted flex items-center justify-center transition-colors">
+                                                <Plus className="w-3 h-3" />
                                             </button>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleDecrease(item.id)}
-                                                className="p-2 rounded-full border"
-                                            >
-                                                <Minus size={16} />
+                                            <button onClick={() => handleDeleteItem(item.id)} className="ml-auto text-xs text-muted-foreground hover:text-red-500 transition-colors">
+                                                Remove
                                             </button>
-                                        )}
-
-                                        <span className="font-semibold w-6 text-center">
-                                            {item.quantity}
-                                        </span>
-
-                                        <button
-                                            onClick={() => handleIncrease(item.id)}
-                                            className="p-2 rounded-full border"
-                                        >
-                                            <Plus size={16} />
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
+                            )
+                        })}
+                    </div>
+
+                    {/* Order summary */}
+                    <div className="bg-white border border-border/50 rounded-xl p-5 space-y-3">
+                        <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-2">Order summary</p>
+
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                            <span>Subtotal</span>
+                            <span>R{cartSubtotal.toFixed(2)}</span>
+                        </div>
+
+                        <div className="flex justify-between text-[11px] text-green-600">
+                            <span className="flex items-center gap-1 ">
+                                <Tag className="w-3 h-3" />
+                                You Saved
+                            </span>
+                            <span className="">{saved.toString()}</span>
+                        </div>
+
+
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                            <span>Delivery</span>
+                            <span className="text-green-600">TBD by runner</span>
+                        </div>
+                        <div className="flex justify-between text-sm font-semibold border-t border-border pt-3 mt-1">
+                            <span>Total</span>
+                            <span className="text-base">R{cartSubtotal.toFixed(2)}</span>
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                sessionStorage.setItem("checkout_cart", JSON.stringify(cartItems))
+                                sessionStorage.setItem("checkout_total", JSON.stringify(cartSubtotal))
+                                router.push("/checkout")
+                            }}
+                            className="w-full py-3 bg-black text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 hover:bg-black/80 transition-colors mt-2"
+                        >
+                            <Lock className="w-4 h-4" />
+                            Proceed to checkout
+                        </button>
+
+                        <div className="border-t border-border pt-4 space-y-2">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <ShieldCheck className="w-3.5 h-3.5 text-green-500" /> 100% authentic products
                             </div>
-                        );
-                    })}
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <RefreshCw className="w-3.5 h-3.5 text-green-500" /> 30-day return policy
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Lock className="w-3.5 h-3.5 text-green-500" /> Secure checkout
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
 
             </ImageKitProvider>
-
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 px-6 md:px-8">
-                <div className="space-y-6">
-                    <div className="flex justify-between border-b border-gray-300 py-3 text-gray-500 text-[10pt]">
-                        <p className="">Subtotal</p>
-                        <p className="font-bold">
-                            R{cartSubtotal.toFixed(2)}
-                        </p>
-                    </div>
-
-                    <div className="flex justify-between font-bold">
-                        <p className="">Total</p>
-                        <p className="text-lg">
-                            R{cartSubtotal.toFixed(2)}
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={() => {
-                            sessionStorage.setItem("checkout_cart", JSON.stringify(cartItems));
-                            sessionStorage.setItem("checkout_total", JSON.stringify(cartSubtotal));
-                            router.push("/checkout");
-                        }}
-                        className="bg-black text-white px-6 py-3 rounded-xl font-semibold w-full"
-                    >
-                        Proceed to Checkout
-                    </button>
-
-                </div>
-            </div>
         </div>
     )
 }

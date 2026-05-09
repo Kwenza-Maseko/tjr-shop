@@ -91,6 +91,14 @@ export const banners = pgTable("banners", {
     }).defaultNow(),
 });
 
+export const announcements = pgTable("announcements", {
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    announcement: varchar("announcement", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at", {
+        withTimezone: true,
+    }).defaultNow(),
+});
+
 export const productTable = pgTable("products", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
     productName: varchar("product_name", { length: 100 }).notNull(),
@@ -120,14 +128,6 @@ export const productTable = pgTable("products", {
 
     brand: varchar("brand", { length: 100 }),
 
-    createdAt: timestamp("created_at", {
-        withTimezone: true,
-    }).defaultNow(),
-});
-
-export const announcements = pgTable("announcements", {
-    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
-    announcement: varchar("announcement", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", {
         withTimezone: true,
     }).defaultNow(),
@@ -183,4 +183,58 @@ export const dealTimeSpan = pgTable("deal_time_span", {
         .notNull()
         .references(() => deals.id, { onDelete: "cascade" }),
     timeSpan: timestamp("time_span", { withTimezone: true }).defaultNow(),
+});
+
+
+export const orderStatusEnum = pgEnum("order_status", [
+  "PENDING",
+  "PAID",
+  "PROCESSING",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
+  "REFUNDED"
+]);
+
+export const shippingMethodEnum = pgEnum("shipping_method", ["PICKUP", "DELIVERY"]);
+
+export const ordersTable = pgTable("orders", {
+  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+
+  // Customer
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => userTable.id, { onDelete: "cascade" }),
+
+  // PayFast
+  mPaymentId: varchar("m_payment_id", { length: 100 }).notNull().unique(),
+  pfPaymentId: varchar("pf_payment_id", { length: 100 }),
+  paymentStatus: varchar("payment_status", { length: 50 }).default("PENDING"),
+
+  // Order
+  status: orderStatusEnum("status").default("PENDING"),
+  shippingMethod: shippingMethodEnum("shipping_method").notNull(),
+
+  // Amounts
+  subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
+  total: numeric("total", { precision: 10, scale: 2 }).notNull(),
+
+  // Cart snapshot: [{ productId, productName, imageUrl, quantity, priceSnapshot, discountSnapshot }]
+  items: jsonb("items").notNull(),
+
+  // Customer snapshot
+  customerName: varchar("customer_name", { length: 255 }),
+  customerEmail: text("customer_email"),
+
+  // ✅ Delivery address — structured fields instead of a single varchar
+  deliveryStreetAddress: varchar("delivery_street_address", { length: 255 }),
+  deliverySuburb: varchar("delivery_suburb", { length: 100 }),
+  deliveryCity: varchar("delivery_city", { length: 100 }),
+  deliveryProvince: varchar("delivery_province", { length: 100 }),
+  deliveryPostalCode: varchar("delivery_postal_code", { length: 4 }),
+
+  // Timestamps
+  paidAt: timestamp("paid_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

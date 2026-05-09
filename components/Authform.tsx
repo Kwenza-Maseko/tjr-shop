@@ -1,11 +1,11 @@
 "use client"
 
 import Image from 'next/image'
-import { z, ZodType } from "zod"
-import { useForm, UseFormReturn, DefaultValues, SubmitHandler, FieldValues, Path } from "react-hook-form"
+import { ZodType } from "zod/v4"
+import type { $ZodType } from "zod/v4/core"
+import { useForm, DefaultValues, SubmitHandler, FieldValues, Path, Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react" // Optional: loading icon
-
+import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -30,11 +30,10 @@ type AuthResponse = {
 
 
 interface Props<T extends FieldValues> {
-    schema: ZodType<T>;
+    schema: ZodType<T> & $ZodType<T, FieldValues>;
     defaultValues: T;
-    onSubmit: (data: T) => Promise<AuthResponse>
+    onSubmit: (data: T) => Promise<AuthResponse>;
     type: "SIGNIN" | "SIGNUP";
-
 }
 
 const AuthForm = <T extends FieldValues>({
@@ -47,8 +46,8 @@ const AuthForm = <T extends FieldValues>({
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
-    const form: UseFormReturn<T> = useForm({
-        resolver: zodResolver(schema),
+    const form = useForm<T>({
+        resolver: zodResolver(schema) as Resolver<T>,
         defaultValues: defaultValues as DefaultValues<T>,
     });
 

@@ -12,7 +12,7 @@
     "db:studio": "npx drizzle-kit studio"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.1.1",
+    "@hookform/resolvers": "^5.2.2",
     "@imagekit/next": "^2.1.2",
     "@neondatabase/serverless": "^1.0.1",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -46,7 +46,7 @@
     "recharts": "^2.15.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
-    "zod": "^3.22.4",
+    "zod": "^4.4.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

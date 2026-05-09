@@ -8,10 +8,10 @@ const FeatureCategory = () => {
     const visibleItems = showAll ? items : items.slice(0, 4);
 
     return (
-        <div className="space-y-4 px-6 md:px-8">
+        <div className="space-y-4 px-6 md:px-8 mt-10">
             {/* Header */}
             <div className="flex justify-between items-center">
-                <p className="text-lg font-bold">Featured Categories</p>
+                <p className="text-lg mb-6 px-6 md:px-2 uppercase tracking-widest">Featured Categories</p>
 
                 <button
                     onClick={() => setShowAll(!showAll)}

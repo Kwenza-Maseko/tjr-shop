@@ -2,12 +2,12 @@ import { z } from "zod";
 
 export const signUpSchema = z.object({
   fullName: z.string().min(3),
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(8),
 });
 
 export const signInSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(8),
 });
 
@@ -17,44 +17,58 @@ export const storeContactDetailsValidation = z.object({
   town: z.string().min(3),
   province: z.string().min(3),
   storeTelNumber: z.string().min(10),
-  storeEmail: z.string().email(), // Add this line if using email
+  storeEmail: z.email(), // Add this line if using email
 });
 
 export const productValidation = z.object({
   id: z.string().optional(),
   productName: z.string().min(1, "Product name is required"),
-  imageUrl: z.string().min(1, "Invalid image URL"),
-  description: z.string().nullable(),
+  imageUrl: z.string().min(1, "Image is required"),
+  description: z.string().nullable().default(null),
   productTarget: z.string().min(1, "Product target is required"),
-  productType: z.string().nullable(),
-  color: z.string().nullable(),
-  // Accept string, then convert to number
-  price: z.coerce.number().min(1, "Price is required"),
-  discountPrice: z.coerce.number().nullable(),
+  productType: z.string().nullable().default(null),
+  color: z.string().nullable().default(null),
 
-  stock: z.coerce.number().nullable(),
+  // ✅ Use z.preprocess instead of z.coerce to avoid unknown inference
+  price: z.preprocess(
+    (v) => (v === '' || v == null ? undefined : Number(v)),
+    z.number().min(0.01, "Price must be greater than 0")
+  ),
+  discountPrice: z.preprocess(
+    (v) => (v === '' || v == null ? null : Number(v)),
+    z.number().nullable().default(null)
+  ),
+  stock: z.preprocess(
+    (v) => (v === '' || v == null ? 0 : Number(v)),
+    z.number().int().min(0).default(0)
+  ),
 
   sku: z.string().min(1, "SKU is required"),
-  category: z.string().nullable(),
-  tags: z.string().nullable(),
+  category: z.string().nullable().default(null),
+  tags: z.string().nullable().default(null),
 
-  weight: z.coerce.number().nullable(),
-  dimensions: z.string().nullable(),
-  rating: z.coerce.number().nullable(),
-  reviewCount: z.coerce.number().nullable(),
+  weight: z.preprocess(
+    (v) => (v === '' || v == null ? null : Number(v)),
+    z.number().nullable().default(null)
+  ),
+  dimensions: z.string().nullable().default(null),
+  rating: z.preprocess(
+    (v) => (v === '' || v == null ? null : Number(v)),
+    z.number().min(0).max(5).nullable().default(null)
+  ),
+  reviewCount: z.preprocess(
+    (v) => (v === '' || v == null ? 0 : Number(v)),
+    z.number().int().min(0).default(0)
+  ),
 
-  isActive: z.boolean().nullable(),
-  relatedProducts: z.array(z.string()).nullable(),
-  variants: z.union([
-    z.array(z.string().nullable()),
-    z.record(z.any())
-  ]).optional().nullable(),
-
-  brand: z.string().nullable(),
-});
+  isActive: z.boolean().default(true),
+  relatedProducts: z.array(z.string()).nullable().default(null),
+  variants: z.record(z.string(), z.array(z.string())).nullable().default(null),
+  brand: z.string().nullable().default(null),
+})
 
 export const checkoutContactDetails = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   phone: z.string().min(10, "Phone number is too short"),
   firstname: z.string().min(2, "First name must be at least 2 characters"),
   lastname: z.string().min(2, "Last name must be at least 2 characters"),

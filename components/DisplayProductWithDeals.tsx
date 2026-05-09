@@ -72,7 +72,7 @@ const DisplayProductWithDeals = () => {
 
     return (
         <div className="w-full py-10 px-4 md:px-8">
-            <h1 className='text-2xl md:text-3xl text-center font-medium mb-8'>🔥 Deals You’ll Love</h1>
+            <h1 className='text-lg mb-6 px-6 md:px-2 uppercase tracking-widest'>🔥 Deals You’ll Love</h1>
 
             <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
                 <div

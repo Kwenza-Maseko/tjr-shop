@@ -1,7 +1,7 @@
 "use client"
 
 import { z, ZodType } from "zod"
-import { useForm, UseFormReturn, DefaultValues, SubmitHandler, FieldValues, Path } from "react-hook-form"
+import { useForm, UseFormReturn, DefaultValues, SubmitHandler, FieldValues, Path, Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react" // Optional: loading icon
 
@@ -20,6 +20,7 @@ import { useState } from 'react'
 import { FIELD_NAMES, FIELD_TYPE } from '@/constants'
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation'
+import { $ZodType } from "zod/v4/core"
 
 type AuthResponse = {
     success: boolean;
@@ -29,11 +30,10 @@ type AuthResponse = {
 
 
 interface Props<T extends FieldValues> {
-    schema: ZodType<T>;
+    schema: ZodType<T> & $ZodType<T, FieldValues>;
     defaultValues: T;
-    onSubmit: (data: T) => Promise<AuthResponse>
+    onSubmit: (data: T) => Promise<AuthResponse>;
     type: "SIGNIN" | "SIGNUP";
-
 }
 
 const AdminAuthForm = <T extends FieldValues>({
@@ -46,8 +46,8 @@ const AdminAuthForm = <T extends FieldValues>({
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
-    const form: UseFormReturn<T> = useForm({
-        resolver: zodResolver(schema),
+    const form = useForm<T>({
+        resolver: zodResolver(schema) as Resolver<T>,
         defaultValues: defaultValues as DefaultValues<T>,
     });
 
@@ -60,9 +60,9 @@ const AdminAuthForm = <T extends FieldValues>({
             toast(isSignedIn ? "Successfull Signed in" : "Successfull Signed up");
 
             if (result.accessGranted === "NOT GRANTED") {
-                router.push(`/waiting-for-access`);
+                router.push(`/admin/waiting-for-access`);
             } else {
-                router.push("/admin/dashboard");
+                router.push("/admin");
             }
         } else {
             toast(

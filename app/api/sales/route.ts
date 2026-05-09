@@ -1,0 +1,18 @@
+import { db } from "@/database/drizzle"
+import { ordersTable } from "@/database/schema"
+import { desc, eq } from "drizzle-orm"
+
+export async function GET() {
+    try {
+        const data = await db
+            .select()
+            .from(ordersTable)
+            .orderBy(desc(ordersTable.createdAt))
+            .where(eq(ordersTable.status, "DELIVERED"))
+
+        return Response.json({ success: true, data })
+    } catch (error) {
+        console.error(error)
+        return Response.json({ success: false }, { status: 500 })
+    }
+}
