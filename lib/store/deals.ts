@@ -25,6 +25,9 @@ interface LinkDealParams {
     productIds: string[];
 }
 
+interface unLinkDealParams {
+    productId: string;
+}
 export const createDeal = async ({ dealCoupon, percentage }: CreateDealParams) => {
     try {
         const inserted = await db
@@ -74,20 +77,17 @@ export const linkDealToProduct = async ({ dealId, productIds }: LinkDealParams) 
         }
 
         for (const productId of productIds) {
-            // Check if a dealProduct already exists for this product
             const existing = await db
                 .select()
                 .from(dealProducts)
                 .where(eq(dealProducts.productId, productId));
 
             if (existing.length > 0) {
-                // Update existing row with new dealId
                 await db
                     .update(dealProducts)
                     .set({ dealId })
                     .where(eq(dealProducts.productId, productId));
             } else {
-                // Insert new row
                 await db.insert(dealProducts).values({ dealId, productId });
             }
         }
@@ -99,6 +99,30 @@ export const linkDealToProduct = async ({ dealId, productIds }: LinkDealParams) 
         };
     } catch (error) {
         console.error("Deal Linking Error:", error);
+        return {
+            success: false,
+            message: "An error occurred while linking deal to product(s)",
+        };
+    }
+};
+
+export const unlinkDealFromProduct = async ({ productId }: unLinkDealParams) => {
+    try {
+        if ( productId.length === 0) {
+            throw new Error("Missing dealId or productIds");
+        }
+
+            await db
+                .delete(dealProducts)
+                .where(eq(dealProducts.productId, productId));
+
+        return {
+            success: true,
+            message: "Deal unlinked to product successfully",
+            action: "unlinked",
+        };
+    } catch (error) {
+        console.error("Deal unLinking Error:", error);
         return {
             success: false,
             message: "An error occurred while linking deal to product(s)",
@@ -199,10 +223,19 @@ export const getDealsWithTimeSpan = async () => {
                 dealCoupon: deals.dealCoupon,
                 percentage: deals.percentage,
                 timeSpan: dealTimeSpan.timeSpan,
-                timeSpanId: dealTimeSpan.id
+                timeSpanId: dealTimeSpan.id,
+                productId: productTable.id,
+                productName: productTable.productName,
+                imageUrl: productTable.imageUrl,
+                price: productTable.price,
+                discountPrice: productTable.discountPrice,
+                rating: productTable.rating,
+                reviewCount: productTable.reviewCount,
             })
             .from(deals)
-            .leftJoin(dealTimeSpan, eq(deals.id, dealTimeSpan.dealId));
+            .leftJoin(dealTimeSpan, eq(deals.id, dealTimeSpan.dealId))
+            .leftJoin(dealProducts, eq(deals.id, dealProducts.dealId))
+            .leftJoin(productTable, eq(dealProducts.productId, productTable.id));
 
         const grouped = Object.values(
             rows.reduce((acc: any, row) => {
@@ -211,14 +244,27 @@ export const getDealsWithTimeSpan = async () => {
                         id: row.id,
                         dealCoupon: row.dealCoupon,
                         percentage: row.percentage,
-                        timeSpans: []
+                        timeSpans: [],
+                        products: [],
                     };
                 }
 
-                if (row.timeSpanId) {
+                if (row.timeSpanId && !acc[row.id].timeSpans.find((t: any) => t.id === row.timeSpanId)) {
                     acc[row.id].timeSpans.push({
                         id: row.timeSpanId,
-                        timeSpan: row.timeSpan
+                        timeSpan: row.timeSpan,
+                    });
+                }
+
+                if (row.productId && !acc[row.id].products.find((p: any) => p.id === row.productId)) {
+                    acc[row.id].products.push({
+                        id: row.productId,
+                        productName: row.productName,
+                        imageUrl: row.imageUrl,
+                        price: row.price,
+                        discountPrice: row.discountPrice,
+                        rating: row.rating,
+                        reviewCount: row.reviewCount,
                     });
                 }
 
@@ -226,169 +272,426 @@ export const getDealsWithTimeSpan = async () => {
             }, {})
         );
 
-        return {
-            success: true,
-            data: grouped,
-        };
+        return { success: true, data: grouped };
     } catch (error) {
-        console.error("Fetch Deals With TimeSpan Error:", error);
-        return {
-            success: false,
-            message: "An error occurred while fetching deals with timespan",
-        };
+        console.error("Fetch Deals Error:", error);
+        return { success: false, message: "An error occurred while fetching deals" };
     }
 };
 
-
 export const getProductsByCategory = async (
-  category: string,      
-  productTarget: string,  
-  productType?: string,   
-  filters?: {
-    brand?: string
-    color?: string
-    priceMin?: number
-    priceMax?: number
-  },
-  page = 1,
-  pageSize = 24
+    category: string,
+    productTarget: string,
+    productType?: string,
+    filters?: {
+        brand?: string
+        color?: string
+        priceMin?: number
+        priceMax?: number
+    },
+    page = 1,
+    pageSize = 24
 ): Promise<{ products: ProductWithDeal[]; total: number } | null> => {
-  const offset = (page - 1) * pageSize
+    const offset = (page - 1) * pageSize
 
-const conditions = [
-  eq(productTable.isActive, true),
+    const conditions = [
+        eq(productTable.isActive, true),
 
-  ilike(productTable.productTarget, `%${productTarget}%`),
+        ilike(productTable.productTarget, `%${productTarget}%`),
 
-  ilike(productTable.category, `%${category}%`),
+        ilike(productTable.category, `%${category}%`),
 
-  ...(productType
-    ? [ilike(productTable.productType, `%${productType}%`)]
-    : []),
-]
+        ...(productType
+            ? [ilike(productTable.productType, `%${productType}%`)]
+            : []),
+    ]
 
-  if (productType) conditions.push(ilike(productTable.productType, productType))
-  if (filters?.brand) conditions.push(eq(productTable.brand, filters.brand))
-  if (filters?.color) conditions.push(ilike(productTable.color, filters.color))
-  if (filters?.priceMin != null)
-    conditions.push(gte(productTable.price, String(filters.priceMin)))
-  if (filters?.priceMax != null)
-    conditions.push(lte(productTable.price, String(filters.priceMax)))
+    if (productType) conditions.push(ilike(productTable.productType, productType))
+    if (filters?.brand) conditions.push(eq(productTable.brand, filters.brand))
+    if (filters?.color) conditions.push(ilike(productTable.color, filters.color))
+    if (filters?.priceMin != null)
+        conditions.push(gte(productTable.price, String(filters.priceMin)))
+    if (filters?.priceMax != null)
+        conditions.push(lte(productTable.price, String(filters.priceMax)))
 
-  const [rows, countRows] = await Promise.all([
-    db
-      .select({
-        id: productTable.id,
-        productName: productTable.productName,
-        imageUrl: productTable.imageUrl,
-        description: productTable.description,
-        productTarget: productTable.productTarget,
-        productType: productTable.productType,
-        color: productTable.color,
-        price: productTable.price,
-        discountPrice: productTable.discountPrice,
-        stock: productTable.stock,
-        sku: productTable.sku,
-        category: productTable.category,
-        tags: productTable.tags,
-        weight: productTable.weight,
-        dimensions: productTable.dimensions,
-        rating: productTable.rating,
-        reviewCount: productTable.reviewCount,
-        isActive: productTable.isActive,
-        relatedProducts: productTable.relatedProducts,
-        variants: productTable.variants,
-        brand: productTable.brand,
-        createdAt: productTable.createdAt,
-        dealCoupon: deals.dealCoupon,
-        dealPercentage: deals.percentage,
-      })
-      .from(productTable)
-      .leftJoin(dealProducts, eq(dealProducts.productId, productTable.id))
-      .leftJoin(deals, eq(deals.id, dealProducts.dealId))
-      .where(and(...conditions))
-      .limit(pageSize)
-      .offset(offset),
+    const [rows, countRows] = await Promise.all([
+        db
+            .select({
+                id: productTable.id,
+                productName: productTable.productName,
+                imageUrl: productTable.imageUrl,
+                description: productTable.description,
+                productTarget: productTable.productTarget,
+                productType: productTable.productType,
+                color: productTable.color,
+                price: productTable.price,
+                discountPrice: productTable.discountPrice,
+                stock: productTable.stock,
+                sku: productTable.sku,
+                category: productTable.category,
+                tags: productTable.tags,
+                weight: productTable.weight,
+                dimensions: productTable.dimensions,
+                rating: productTable.rating,
+                reviewCount: productTable.reviewCount,
+                isActive: productTable.isActive,
+                relatedProducts: productTable.relatedProducts,
+                variants: productTable.variants,
+                brand: productTable.brand,
+                createdAt: productTable.createdAt,
+                dealCoupon: deals.dealCoupon,
+                dealPercentage: deals.percentage,
+            })
+            .from(productTable)
+            .leftJoin(dealProducts, eq(dealProducts.productId, productTable.id))
+            .leftJoin(deals, eq(deals.id, dealProducts.dealId))
+            .where(and(...conditions))
+            .limit(pageSize)
+            .offset(offset),
 
-    db
-      .select({ count: count() })
-      .from(productTable)
-      .where(and(...conditions)),
-  ])
+        db
+            .select({ count: count() })
+            .from(productTable)
+            .where(and(...conditions)),
+    ])
 
-  if (!rows.length) return null
+    if (!rows.length) return null
 
-  return {
-    products: rows.map(r => ({
-      ...r,
-      price: Number(r.price),
-      discountPrice: r.discountPrice ? Number(r.discountPrice) : null,
-      weight: r.weight ? Number(r.weight) : null,
-      rating: Number(r.rating ?? 0),
-      reviewCount: r.reviewCount ?? 0,
-      stock: r.stock ?? 0,
-      isActive: r.isActive ?? true,
-      relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-      variants: (r.variants as Record<string, any> | null) ?? {},
-      dealCoupon: r.dealCoupon ?? null,
-      dealPercentage: r.dealPercentage ?? null,
-    })),
-    total: Number(countRows[0].count),
-  }
+    return {
+        products: rows.map(r => ({
+            ...r,
+            price: Number(r.price),
+            discountPrice: r.discountPrice ? Number(r.discountPrice) : null,
+            weight: r.weight ? Number(r.weight) : null,
+            rating: Number(r.rating ?? 0),
+            reviewCount: r.reviewCount ?? 0,
+            stock: r.stock ?? 0,
+            isActive: r.isActive ?? true,
+            relatedProducts: (r.relatedProducts as string[] | null) ?? [],
+            variants: (r.variants as Record<string, any> | null) ?? {},
+            dealCoupon: r.dealCoupon ?? null,
+            dealPercentage: r.dealPercentage ?? null,
+        })),
+        total: Number(countRows[0].count),
+    }
 }
 
+export const getAllProducts = async (
+    filters?: {
+        brand?: string
+        color?: string
+        priceMin?: number
+        priceMax?: number
+    },
+    page = 1,
+    pageSize = 24
+): Promise<{ products: ProductWithDeal[]; total: number } | null> => {
+    const offset = (page - 1) * pageSize
+
+    const conditions = [
+        eq(productTable.isActive, true),
+    ]
+
+    if (filters?.brand) conditions.push(eq(productTable.brand, filters.brand))
+    if (filters?.color) conditions.push(ilike(productTable.color, filters.color))
+    if (filters?.priceMin != null)
+        conditions.push(gte(productTable.price, String(filters.priceMin)))
+    if (filters?.priceMax != null)
+        conditions.push(lte(productTable.price, String(filters.priceMax)))
+
+    const [rows, countRows] = await Promise.all([
+        db
+            .select({
+                id: productTable.id,
+                productName: productTable.productName,
+                imageUrl: productTable.imageUrl,
+                description: productTable.description,
+                productTarget: productTable.productTarget,
+                productType: productTable.productType,
+                color: productTable.color,
+                price: productTable.price,
+                discountPrice: productTable.discountPrice,
+                stock: productTable.stock,
+                sku: productTable.sku,
+                category: productTable.category,
+                tags: productTable.tags,
+                weight: productTable.weight,
+                dimensions: productTable.dimensions,
+                rating: productTable.rating,
+                reviewCount: productTable.reviewCount,
+                isActive: productTable.isActive,
+                relatedProducts: productTable.relatedProducts,
+                variants: productTable.variants,
+                brand: productTable.brand,
+                createdAt: productTable.createdAt,
+                dealCoupon: deals.dealCoupon,
+                dealPercentage: deals.percentage,
+            })
+            .from(productTable)
+            .leftJoin(dealProducts, eq(dealProducts.productId, productTable.id))
+            .leftJoin(deals, eq(deals.id, dealProducts.dealId))
+            .where(and(...conditions))
+            .orderBy(productTable.createdAt)
+            .limit(pageSize)
+            .offset(offset),
+
+        db
+            .select({ count: count() })
+            .from(productTable)
+            .where(and(...conditions)),
+    ])
+
+    if (!rows.length) return null
+
+    return {
+        products: rows.map(r => ({
+            ...r,
+            price: Number(r.price),
+            discountPrice: r.discountPrice ? Number(r.discountPrice) : null,
+            weight: r.weight ? Number(r.weight) : null,
+            rating: Number(r.rating ?? 0),
+            reviewCount: r.reviewCount ?? 0,
+            stock: r.stock ?? 0,
+            isActive: r.isActive ?? true,
+            relatedProducts: (r.relatedProducts as string[] | null) ?? [],
+            variants: (r.variants as Record<string, any> | null) ?? {},
+            dealCoupon: r.dealCoupon ?? null,
+            dealPercentage: r.dealPercentage ?? null,
+        })),
+        total: Number(countRows[0].count),
+    }
+}
+
+export const getAllTargetedProducts = async (
+    productTarget: string,
+    filters?: {
+        brand?: string
+        color?: string
+        priceMin?: number
+        priceMax?: number
+    },
+    page = 1,
+    pageSize = 24
+): Promise<{ products: ProductWithDeal[]; total: number } | null> => {
+    const offset = (page - 1) * pageSize
+
+    const conditions = [
+        eq(productTable.isActive, true),
+
+        ilike(productTable.productTarget, `%${productTarget}%`),
+    ]
+
+    if (filters?.brand) conditions.push(eq(productTable.brand, filters.brand))
+    if (filters?.color) conditions.push(ilike(productTable.color, filters.color))
+    if (filters?.priceMin != null)
+        conditions.push(gte(productTable.price, String(filters.priceMin)))
+    if (filters?.priceMax != null)
+        conditions.push(lte(productTable.price, String(filters.priceMax)))
+
+    const [rows, countRows] = await Promise.all([
+        db
+            .select({
+                id: productTable.id,
+                productName: productTable.productName,
+                imageUrl: productTable.imageUrl,
+                description: productTable.description,
+                productTarget: productTable.productTarget,
+                productType: productTable.productType,
+                color: productTable.color,
+                price: productTable.price,
+                discountPrice: productTable.discountPrice,
+                stock: productTable.stock,
+                sku: productTable.sku,
+                category: productTable.category,
+                tags: productTable.tags,
+                weight: productTable.weight,
+                dimensions: productTable.dimensions,
+                rating: productTable.rating,
+                reviewCount: productTable.reviewCount,
+                isActive: productTable.isActive,
+                relatedProducts: productTable.relatedProducts,
+                variants: productTable.variants,
+                brand: productTable.brand,
+                createdAt: productTable.createdAt,
+                dealCoupon: deals.dealCoupon,
+                dealPercentage: deals.percentage,
+            })
+            .from(productTable)
+            .leftJoin(dealProducts, eq(dealProducts.productId, productTable.id))
+            .leftJoin(deals, eq(deals.id, dealProducts.dealId))
+            .where(and(...conditions))
+            .limit(pageSize)
+            .offset(offset),
+
+        db
+            .select({ count: count() })
+            .from(productTable)
+            .where(and(...conditions)),
+    ])
+
+    if (!rows.length) return null
+
+    return {
+        products: rows.map(r => ({
+            ...r,
+            price: Number(r.price),
+            discountPrice: r.discountPrice ? Number(r.discountPrice) : null,
+            weight: r.weight ? Number(r.weight) : null,
+            rating: Number(r.rating ?? 0),
+            reviewCount: r.reviewCount ?? 0,
+            stock: r.stock ?? 0,
+            isActive: r.isActive ?? true,
+            relatedProducts: (r.relatedProducts as string[] | null) ?? [],
+            variants: (r.variants as Record<string, any> | null) ?? {},
+            dealCoupon: r.dealCoupon ?? null,
+            dealPercentage: r.dealPercentage ?? null,
+        })),
+        total: Number(countRows[0].count),
+    }
+}
+
+export const getAllProductsType = async (
+    category: string,
+    productTarget: string,
+    filters?: {
+        brand?: string
+        color?: string
+        priceMin?: number
+        priceMax?: number
+    },
+    page = 1,
+    pageSize = 24
+): Promise<{ products: ProductWithDeal[]; total: number } | null> => {
+    const offset = (page - 1) * pageSize
+
+    const conditions = [
+        eq(productTable.isActive, true),
+
+        ilike(productTable.productTarget, `%${productTarget}%`),
+
+        ilike(productTable.category, `%${category}%`),
+    ]
+
+    if (filters?.brand) conditions.push(eq(productTable.brand, filters.brand))
+    if (filters?.color) conditions.push(ilike(productTable.color, filters.color))
+    if (filters?.priceMin != null)
+        conditions.push(gte(productTable.price, String(filters.priceMin)))
+    if (filters?.priceMax != null)
+        conditions.push(lte(productTable.price, String(filters.priceMax)))
+
+    const [rows, countRows] = await Promise.all([
+        db
+            .select({
+                id: productTable.id,
+                productName: productTable.productName,
+                imageUrl: productTable.imageUrl,
+                description: productTable.description,
+                productTarget: productTable.productTarget,
+                productType: productTable.productType,
+                color: productTable.color,
+                price: productTable.price,
+                discountPrice: productTable.discountPrice,
+                stock: productTable.stock,
+                sku: productTable.sku,
+                category: productTable.category,
+                tags: productTable.tags,
+                weight: productTable.weight,
+                dimensions: productTable.dimensions,
+                rating: productTable.rating,
+                reviewCount: productTable.reviewCount,
+                isActive: productTable.isActive,
+                relatedProducts: productTable.relatedProducts,
+                variants: productTable.variants,
+                brand: productTable.brand,
+                createdAt: productTable.createdAt,
+                dealCoupon: deals.dealCoupon,
+                dealPercentage: deals.percentage,
+            })
+            .from(productTable)
+            .leftJoin(dealProducts, eq(dealProducts.productId, productTable.id))
+            .leftJoin(deals, eq(deals.id, dealProducts.dealId))
+            .where(and(...conditions))
+            .limit(pageSize)
+            .offset(offset),
+
+        db
+            .select({ count: count() })
+            .from(productTable)
+            .where(and(...conditions)),
+    ])
+
+    if (!rows.length) return null
+
+    return {
+        products: rows.map(r => ({
+            ...r,
+            price: Number(r.price),
+            discountPrice: r.discountPrice ? Number(r.discountPrice) : null,
+            weight: r.weight ? Number(r.weight) : null,
+            rating: Number(r.rating ?? 0),
+            reviewCount: r.reviewCount ?? 0,
+            stock: r.stock ?? 0,
+            isActive: r.isActive ?? true,
+            relatedProducts: (r.relatedProducts as string[] | null) ?? [],
+            variants: (r.variants as Record<string, any> | null) ?? {},
+            dealCoupon: r.dealCoupon ?? null,
+            dealPercentage: r.dealPercentage ?? null,
+        })),
+        total: Number(countRows[0].count),
+    }
+}
 
 export const getProductById = async (id: string): Promise<ProductWithDeal | null> => {
-  const rows = await db
-    .select({
-      id: productTable.id,
-      productName: productTable.productName,
-      imageUrl: productTable.imageUrl,
-      description: productTable.description,
-      productTarget: productTable.productTarget,
-      productType: productTable.productType,
-      color: productTable.color,
-      price: productTable.price,
-      discountPrice: productTable.discountPrice,
-      stock: productTable.stock,
-      sku: productTable.sku,
-      category: productTable.category,
-      tags: productTable.tags,
-      weight: productTable.weight,
-      dimensions: productTable.dimensions,
-      rating: productTable.rating,
-      reviewCount: productTable.reviewCount,
-      isActive: productTable.isActive,
-      relatedProducts: productTable.relatedProducts,
-      variants: productTable.variants,
-      brand: productTable.brand,
-      createdAt: productTable.createdAt,
-      // Deal columns
-      dealCoupon: deals.dealCoupon,
-      dealPercentage: deals.percentage,
-    })
-    .from(productTable)
-    .leftJoin(dealProducts, eq(dealProducts.productId, productTable.id))
-    .leftJoin(deals, eq(deals.id, dealProducts.dealId))
-    .where(eq(productTable.id, id))
-    .limit(1)
+    const rows = await db
+        .select({
+            id: productTable.id,
+            productName: productTable.productName,
+            imageUrl: productTable.imageUrl,
+            description: productTable.description,
+            productTarget: productTable.productTarget,
+            productType: productTable.productType,
+            color: productTable.color,
+            price: productTable.price,
+            discountPrice: productTable.discountPrice,
+            stock: productTable.stock,
+            sku: productTable.sku,
+            category: productTable.category,
+            tags: productTable.tags,
+            weight: productTable.weight,
+            dimensions: productTable.dimensions,
+            rating: productTable.rating,
+            reviewCount: productTable.reviewCount,
+            isActive: productTable.isActive,
+            relatedProducts: productTable.relatedProducts,
+            variants: productTable.variants,
+            brand: productTable.brand,
+            createdAt: productTable.createdAt,
+            // Deal columns
+            dealCoupon: deals.dealCoupon,
+            dealPercentage: deals.percentage,
+        })
+        .from(productTable)
+        .leftJoin(dealProducts, eq(dealProducts.productId, productTable.id))
+        .leftJoin(deals, eq(deals.id, dealProducts.dealId))
+        .where(eq(productTable.id, id))
+        .limit(1)
 
-  if (!rows.length) return null
+    if (!rows.length) return null
 
-  const r = rows[0]
-  return {
-    ...r,
-    price: Number(r.price),
-    discountPrice: r.discountPrice ? Number(r.discountPrice) : null,
-    weight: r.weight ? Number(r.weight) : null,
-    rating: Number(r.rating ?? 0),
-    reviewCount: r.reviewCount ?? 0,
-    stock: r.stock ?? 0,
-    isActive: r.isActive ?? true,
-    relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-    variants: (r.variants as Record<string, any> | null) ?? {},
-    brand: r.brand ?? null,
-    dealCoupon: r.dealCoupon ?? null,
-    dealPercentage: r.dealPercentage ?? null,
-  }
+    const r = rows[0]
+    return {
+        ...r,
+        price: Number(r.price),
+        discountPrice: r.discountPrice ? Number(r.discountPrice) : null,
+        weight: r.weight ? Number(r.weight) : null,
+        rating: Number(r.rating ?? 0),
+        reviewCount: r.reviewCount ?? 0,
+        stock: r.stock ?? 0,
+        isActive: r.isActive ?? true,
+        relatedProducts: (r.relatedProducts as string[] | null) ?? [],
+        variants: (r.variants as Record<string, any> | null) ?? {},
+        brand: r.brand ?? null,
+        dealCoupon: r.dealCoupon ?? null,
+        dealPercentage: r.dealPercentage ?? null,
+    }
 }

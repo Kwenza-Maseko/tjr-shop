@@ -342,7 +342,6 @@ export const help = [
   { id: 3, name: "Shipping & Delivery", url: "/shipping-and-delivery"},
   { id: 4, name: "Return", url: "/return" },
   { id: 5, name: "Payment Option", url: "/payment-option" },
-  { id: 6, name: "Contact us", url: "/contact-us" },
 ];
 
 

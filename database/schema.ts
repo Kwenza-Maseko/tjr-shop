@@ -99,39 +99,7 @@ export const announcements = pgTable("announcements", {
     }).defaultNow(),
 });
 
-export const productTable = pgTable("products", {
-    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
-    productName: varchar("product_name", { length: 100 }).notNull(),
-    imageUrl: varchar("image_url", { length: 255 }).notNull(),
-    description: varchar("description", { length: 255 }),
-    productTarget: varchar("product_target", { length: 255 }).notNull(),
-    productType: varchar("product_type", { length: 120 }),
-    color: varchar("color", { length: 100 }),
 
-    price: numeric("price", { precision: 10, scale: 2 }).notNull(), // product price
-    discountPrice: numeric("discount_price", { precision: 10, scale: 2 }), // optional sale price
-    stock: integer("stock").default(0), // quantity available
-    sku: varchar("sku", { length: 50 }).notNull().unique(), // unique stock keeping unit
-
-    category: varchar("category", { length: 100 }), // e.g., skincare, electronics
-    tags: varchar("tags", { length: 255 }), // comma-separated tags for filtering/searching
-
-    weight: numeric("weight", { precision: 10, scale: 2 }), // kg or lbs
-    dimensions: varchar("dimensions", { length: 100 }), // e.g., 10x5x2 cm
-
-    rating: numeric("rating", { precision: 2, scale: 1 }).default(sql`0`), // average rating
-    reviewCount: integer("review_count").default(0),
-
-    isActive: boolean("is_active").default(true), // whether product is visible in store
-    relatedProducts: jsonb("related_products"), // list of related product IDs
-    variants: jsonb("variants"), // for color/size variants
-
-    brand: varchar("brand", { length: 100 }),
-
-    createdAt: timestamp("created_at", {
-        withTimezone: true,
-    }).defaultNow(),
-});
 
 export const cartTable = pgTable("cart", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -166,7 +134,6 @@ export const deals = pgTable("deals", {
 });
 
 
-// Junction table for multiple products per deal
 export const dealProducts = pgTable("deal_products", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
     dealId: uuid("deal_id")
@@ -185,6 +152,39 @@ export const dealTimeSpan = pgTable("deal_time_span", {
     timeSpan: timestamp("time_span", { withTimezone: true }).defaultNow(),
 });
 
+export const productTable = pgTable("products", {
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    productName: varchar("product_name", { length: 100 }).notNull(),
+    imageUrl: varchar("image_url", { length: 255 }).notNull(),
+    description: varchar("description", { length: 255 }),
+    productTarget: varchar("product_target", { length: 255 }).notNull(),
+    productType: varchar("product_type", { length: 120 }),
+    color: varchar("color", { length: 100 }),
+
+    price: numeric("price", { precision: 10, scale: 2 }).notNull(), // product price
+    discountPrice: numeric("discount_price", { precision: 10, scale: 2 }), // optional sale price
+    stock: integer("stock").default(0), // quantity available
+    sku: varchar("sku", { length: 50 }).notNull().unique(), // unique stock keeping unit
+
+    category: varchar("category", { length: 100 }), // e.g., skincare, electronics
+    tags: varchar("tags", { length: 255 }), // comma-separated tags for filtering/searching
+
+    weight: numeric("weight", { precision: 10, scale: 2 }), // kg or lbs
+    dimensions: varchar("dimensions", { length: 100 }), // e.g., 10x5x2 cm
+
+    rating: numeric("rating", { precision: 2, scale: 1 }).default(sql`0`), // average rating
+    reviewCount: integer("review_count").default(0),
+
+    isActive: boolean("is_active").default(true), // whether product is visible in store
+    relatedProducts: jsonb("related_products"), // list of related product IDs
+    variants: jsonb("variants"), // for color/size variants
+
+    brand: varchar("brand", { length: 100 }),
+
+    createdAt: timestamp("created_at", {
+        withTimezone: true,
+    }).defaultNow(),
+});
 
 export const orderStatusEnum = pgEnum("order_status", [
   "PENDING",
@@ -238,3 +238,9 @@ export const ordersTable = pgTable("orders", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
+
+export const pendingOrdersTable = pgTable("pending_orders", {
+  id: text("id").primaryKey(),
+  data: jsonb("data").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+})

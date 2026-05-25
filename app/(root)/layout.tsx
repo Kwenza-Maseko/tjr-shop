@@ -9,17 +9,23 @@ import { redirect } from 'next/navigation';
 import { ReactNode } from 'react'
 
 const Layout = async ({ children }: { children: ReactNode }) => {
-
     const session = await auth();
 
     if (!session?.user?.id) {
         redirect("/sign-in")
     }
-    const [admin] = await db
-        .select()
-        .from(userTable)
-        .where(eq(userTable.id, session.user.id))
-        .limit(1)
+
+    let admin;
+    try {
+        const [result] = await db
+            .select({ id: userTable.id, role: userTable.role })
+            .from(userTable)
+            .where(eq(userTable.id, session.user.id))
+            .limit(1)
+        admin = result
+    } catch (error) {
+        redirect("/sign-in")
+    }
 
     if (!admin) {
         redirect("/sign-in")

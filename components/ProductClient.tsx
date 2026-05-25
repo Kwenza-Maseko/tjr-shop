@@ -68,20 +68,17 @@ const ProductClient = ({ userId }: { userId: string }) => {
                 productId: product.id,
                 imageUrl: product.imageUrl,
                 quantity: 1,
-
                 priceSnapshot: originalPrice.toFixed(2),
-
                 discountSnapshot: effectivePrice
                     ? effectivePrice.toFixed(2)
                     : null,
-
                 selectedOptions: {
                     color: selectedColor,
                     size: selectedSize,
                 },
             });
 
-            toast.success(`${product.productName} added to cart 🛒`);
+            toast.success(`${product.productName} added to cart`);
         } catch (error) {
             console.error(error);
             toast.error("Failed to add item to cart");
@@ -89,7 +86,7 @@ const ProductClient = ({ userId }: { userId: string }) => {
     };
 
     return (
-        <div className="w-full p-6">
+        <div className="w-full p-6 md:mt-8">
             <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
                 <div className="flex flex-col lg:flex-row  gap-8 md:gap-18 mx-auto">
                     <div className="block lg:hidden">
@@ -102,7 +99,7 @@ const ProductClient = ({ userId }: { userId: string }) => {
                             alt={product.productName || "Product Image"}
                             className="custom-light-shadow-box object-cover w-full h-full"
                             loading="lazy"
-                            width={350}        // Required for optimization
+                            width={350}
                             height={350}
                         />
                     </div>
@@ -139,8 +136,8 @@ const ProductClient = ({ userId }: { userId: string }) => {
                                 )}
 
                                 <p
-                                    className={`${product.isActive ? "text-green-900 bg-green-200" : "text-red-900 bg-red-200"
-                                        } font-semibold py-1 px-2 w-fit mt-3 text-xs rounded-full`}
+                                    className={`${product.isActive ? "text-green-700 bg-green-300" : "text-red-900 bg-red-200"
+                                        } font-semibold py-1 px-2 w-fit mt-3 text-[11px] rounded-full`}
                                 >
                                     {product.isActive ? "On Stock" : "Out Of Stock"}
                                 </p>
@@ -148,7 +145,6 @@ const ProductClient = ({ userId }: { userId: string }) => {
 
                             <div className="w-full h-[1px] bg-gray-300 " />
 
-                            {/* 🎨 Color Selection */}
                             {/* 🎨 Color Selection */}
                             <div>
                                 <h3 className="text-md font-semibold mb-4">
@@ -183,7 +179,7 @@ const ProductClient = ({ userId }: { userId: string }) => {
                                                         ? 'border-black scale-110 shadow-md'
                                                         : 'border-zinc-200 hover:border-zinc-400'
                                                     }
-            ${color.toLowerCase() === 'white' ? 'outline outline-1 outline-zinc-200' : ''}
+            ${color.toLowerCase() === 'white' ? 'outline outline-zinc-200' : ''}
           `}
                                                 style={{ backgroundColor: color.toLowerCase() }}
                                             />

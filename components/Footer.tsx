@@ -4,28 +4,38 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 import { StoreDetailsParams } from "@/types";
 import {
   Building2Icon,
   Landmark,
-  Loader2,
-  LocationEdit,
   Mail,
   MapPin,
   Phone,
-  Trash
 } from "lucide-react";
-import { deleteStoreDetail, getContactDetailsByStoreId } from "@/lib/store/store-contact-details";
+import { getContactDetailsByStoreId } from "@/lib/store/store-contact-details";
 import { help, navitems } from "@/constants";
 import Link from "next/link";
+import Image from 'next/image'
+
+
+const FOOTER_LINKS = [
+  {
+    target: 'men',
+  },
+  {
+    target: 'women',
+  },
+  {
+    target: 'kids',
+  },
+  {
+    target: 'sport',
+  },
+]
 
 const Footer = () => {
   const [storeContactDetails, setStoreContactDetails] = useState<StoreDetailsParams[]>();
-  const [isOpened, setIsOpened] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<StoreDetailsParams | null>(null);
 
   useEffect(() => {
     const fetchContactDetails = async () => {
@@ -39,19 +49,24 @@ const Footer = () => {
 
   return (
     <div
-      className="bg-white px-6 md:px-8 py-16 mt-16 grid grid-cols-1 md:grid-cols-4 gap-6 font-semibold">
+      className="border-t px-6 md:px-8 py-16 mt-16 grid grid-cols-1 md:grid-cols-4 gap-6">
       <div>
-        <p className='font-black text-xl'>TJR.<span className='text-md text-purple-600'>ONLINE</span></p>
+        <Image
+          src={"/assets/tjr-logo-removebg-preview.png"}
+          width={100}
+          height={100}
+          alt='logo'
+        />
       </div>
       {storeContactDetails?.length && (
-        <div className="space-y-4 text-gray-800">
-          <p className='font-black text-lg'>Address</p>
+        <div className="space-y-4 text-zinc-700">
+          <p className='font-semibold text-lg mb-6'>Address</p>
           {storeContactDetails.map((contact) => (
-            <div className="space-y-4 w-full text-gray-700"
+            <div className="space-y-4 w-full text-zinc-500"
               key={contact.id}>
               <div className="flex items-center gap-2">
                 <Landmark size={18} />
-                <p className="font-bold text-md">{contact.province}</p>
+                <p className="">{contact.province}</p>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={15} />
@@ -76,15 +91,15 @@ const Footer = () => {
         </div>
       )}
 
-      <div className="space-y-4 text-gray-800">
-        <p className="font-black text-lg">Help</p>
+      <div className="space-y-4 text-zinc-700">
+        <p className="font-semibold text-lg mb-6">Help</p>
 
-        <ul className="space-y-3 text-gray-700">
+        <ul className="space-y-3">
           {help.map((item) => (
             <li key={item.id}>
               <Link
                 href={item.url}
-                className="text-gray-700 hover:text-gray-600 cursor-pointer block"
+                className="text-zinc-500 hover:underline cursor-pointer block"
               >
                 {item.name}
               </Link>
@@ -93,14 +108,14 @@ const Footer = () => {
         </ul>
       </div>
 
-      <div className="space-y-4 text-gray-800">
-        <p className='font-black text-lg'>Quick Links</p>
-        <ul className="space-y-4 w-full text-gray-700">
-          {navitems.map((item) => (
-            <li key={item.name} className="">
-              <button className="text-gray-700 hover:text-gray-600 cursor-pointer">
-                {item.name}
-              </button>
+      <div className="space-y-4 text-zinc-700">
+        <p className='font-semibold text-lg mb-6'>Quick Links</p>
+        <ul className="space-y-4 w-full">
+          {FOOTER_LINKS.map((item) => (
+            <li key={item.target} className="">
+              <Link href={`/store/${item.target}/all`} className="text-zinc-500 hover:underline cursor-pointer capitalize">
+                {item.target}
+              </Link>
             </li>
           ))}
         </ul>

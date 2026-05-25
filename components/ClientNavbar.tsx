@@ -1,11 +1,12 @@
 'use client'
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { navitems } from '@/constants'
 import { Session } from 'next-auth'
 import { Bell, LogOut, ShoppingCart, ChevronRight } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import Notifications from './Notifications'
+import Image from 'next/image'
+import NavSearch from './NavbarSearch'
 
 interface SidebarProps {
     session: Session | null
@@ -39,7 +40,7 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
     const typeMap: GroupedTypes = productTypes ?? {}
 
     const getInitials = (name: string) =>
-        name.split(' ').slice(0, 2).map(w => w.charAt(0).toUpperCase()).join('')
+        name.charAt(0).toUpperCase()
 
     const [dropdown, setDropdown] = useState(false)
     const [menuDropdown, setMenuDropdown] = useState(false)
@@ -59,10 +60,15 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
         str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 
     return (
-        <nav className='bg-white p-3 md:px-6 md:py-0 fixed top-0 left-0 right-0 z-50 border-b border-zinc-200'>
+        <nav className='bg-white px-6 md:px-6 md:py-0 fixed top-0 left-0 right-0 z-50 border-b border-zinc-200'>
             <div className='flex gap-3 justify-between items-center'>
                 <Link href="/">
-                    <p className='font-black text-lg'>TJR.<span className='text-xs text-purple-600'>ONLINE</span></p>
+                    <Image
+                        src={"/assets/tjr-logo.png"}
+                        width={50}
+                        height={50}
+                        alt='logo'
+                    />
                 </Link>
 
                 {/* ── Desktop nav ── */}
@@ -132,13 +138,14 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
 
                 {/* ── Right icons ── */}
                 <div className="flex gap-3 items-center">
+                    <NavSearch /> 
                     {session?.user && (
                         <div className="flex items-center gap-3 relative">
                             <Link href="/cart">
-                                <ShoppingCart className="w-6 h-6" />
+                                <ShoppingCart className="w-5 h-5 text-zinc-600" />
                             </Link>
                             <Bell
-                                className="w-6 h-6 cursor-pointer"
+                                className="w-5 h-5 text-zinc-600 cursor-pointer"
                                 onClick={() => setIsNotificationOpen(p => !p)}
                             />
                             <div
@@ -149,7 +156,7 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
                             </div>
 
                             {dropdown && (
-                                <div className="absolute right-4 top-10 w-60 truncate bg-white z-50 space-y-4 custom-light-shadow-box p-1">
+                                <div className="absolute right-0 top-10 w-60 truncate bg-white z-50 space-y-4 custom-light-shadow-box p-1">
                                     <div className="p-3 text-gray-600 rounded bg-zinc-100">{session.user.name}</div>
                                     <div className='flex flex-col gap-4'>
                                         <Link href={`/account/${session.user.id}/track`} className='px-3'>Track Order</Link>

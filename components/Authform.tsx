@@ -71,12 +71,12 @@ const AuthForm = <T extends FieldValues>({
     }
 
     return (
-        <div className='w-[400px]  p-8 flex flex-col items-center gap-8'>
+        <div className='w-[400px]  px-8 flex flex-col items-center gap-8'>
 
             <div className='flex flex-col gap-2 text-center'>
-                <h3 className='font-bold text-xl text-gray-500'>{isSignedIn ? "Sign in" : "Sign up"}</h3>
+                <h3 className='font-medium text-gray-500 uppercase'>{isSignedIn ? "Sign in" : "Sign up"}</h3>
 
-                <p className='text-center text-gray-500'>{isSignedIn ? "Welcome to TJR Shop" : "Create a account with us"} </p>
+                <p className='text-center text-gray-500 text-lg font-semibold'>{isSignedIn ? "Welcome to TJR Shop" : "Create a account with us"} </p>
             </div>
 
 

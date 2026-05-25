@@ -191,7 +191,6 @@ function OrderCard({ order }: { order: Order }) {
 
   return (
     <div className="border border-border rounded-xl overflow-hidden bg-white">
-
       {/* Card header */}
       <div
         className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors"

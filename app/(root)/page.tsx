@@ -1,13 +1,14 @@
 'use client'
+import CategoryGrid from '@/components/CategoryGrid';
+import Copyright from '@/components/Copyright';
 import DisplayDeals from '@/components/DisplayDeals';
-import DisplayProductWithDeals from '@/components/DisplayProductWithDeals';
-import FeatureCategory from '@/components/FeatureCategory';
 import Footer from '@/components/Footer';
 import DisplayBanner from '@/components/Shop/DisplayBanner'
 import config from '@/lib/config';
-import { getLatestProducts, getProducts } from '@/lib/store/product';
+import { getLatestProducts } from '@/lib/store/product';
 import { ProductParams } from '@/types';
 import { IKImage, ImageKitProvider } from 'imagekitio-next';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 
 const { urlEndpoint, publicKey } = config.env.imagekit;
@@ -27,11 +28,11 @@ const HomePage = () => {
   return (
     <div className='w-full space-y-5'>
       <DisplayBanner />
-      <FeatureCategory />
+      <CategoryGrid />
       <DisplayDeals />
       <div className='space-y-5 px-0  md:px-6'>
         <div className="">
-          <h1 className="text-lg mb-8 px-6 md:px-2 uppercase tracking-widest">Latest on a Catalog</h1>
+          <h1 className="text-medium mb-8 px-6 md:px-2 uppercase tracking-widest">Latest on a Catalog</h1>
           {products && products.length > 0 && (
             <ImageKitProvider
               urlEndpoint={urlEndpoint}
@@ -52,11 +53,11 @@ const HomePage = () => {
                     {/* Gradient Overlay with Product Name */}
                     {product?.productName && (
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col items-start justify-end gap-3  px-8 md:px-10 py-4 md:py-10">
-                        <p className='capitalize text-lg  text-white'>Category: {product.productType}</p>
-                        <div className=" w-full text-center">
-                          <p className="bg-white/90 backdrop-blur-sm text-black text-md md:text-lg font-semibold w-fit rounded-full truncate  px-8 py-1">
+                        <p className='capitalize text-lg  text-white'>Category: {product.category}</p>
+                        <div className="w-full">
+                          <Link href={`/product/${product.id}`} className="bg-white/90 backdrop-blur-sm text-black text-md md:text-lg font-semibold w-fit rounded-full truncate  px-8 py-2 ">
                             {product.productName}
-                          </p>
+                          </Link>
                         </div>
                       </div>
                     )}
@@ -69,8 +70,8 @@ const HomePage = () => {
           )}
         </div>
       </div>
-      <DisplayProductWithDeals />
       <Footer />
+      <Copyright />
     </div>
   )
 }

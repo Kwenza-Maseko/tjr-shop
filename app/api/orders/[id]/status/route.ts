@@ -1,4 +1,3 @@
-// app/api/orders/[id]/status/route.ts — update order status
 
 import { db } from "@/database/drizzle"
 import { ordersTable } from "@/database/schema"

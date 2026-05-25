@@ -16,17 +16,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
+
         const user = await db
           .select()
           .from(userTable)
           .where(eq(userTable.email, credentials.email.toString()))
           .limit(1)
+
         if (!user.length) return null
 
-        const isPasswordValid = await compare(credentials.password.toString(), user[0].password)
+        const isPasswordValid = await compare(
+          credentials.password.toString(),
+          user[0].password
+        )
         if (!isPasswordValid) return null
 
-        return { id: user[0].id.toString(), email: user[0].email, name: user[0].fullName }
+        return {
+          id: user[0].id.toString(),
+          email: user[0].email,
+          name: user[0].fullName,
+          role: user[0].role ?? "user",
+        }
       },
     }),
   ],
@@ -36,6 +46,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id
         token.name = user.name
+        token.role = user.role 
       }
       return token
     },
@@ -43,6 +54,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string
         session.user.name = token.name as string
+        session.user.role = token.role as string 
       }
       return session
     },

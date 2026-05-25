@@ -108,13 +108,13 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub: st
 }
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-    PENDING:    { bg: 'bg-yellow-50',  text: 'text-yellow-700',  border: 'border-yellow-200', dot: 'bg-yellow-400' },
-    PAID:       { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200',   dot: 'bg-blue-500'   },
-    PROCESSING: { bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200', dot: 'bg-purple-500' },
-    SHIPPED:    { bg: 'bg-indigo-50',  text: 'text-indigo-700',  border: 'border-indigo-200', dot: 'bg-indigo-500' },
-    DELIVERED:  { bg: 'bg-green-50',   text: 'text-green-700',   border: 'border-green-200',  dot: 'bg-green-500'  },
-    CANCELLED:  { bg: 'bg-red-50',     text: 'text-red-700',     border: 'border-red-200',    dot: 'bg-red-400'    },
-    REFUNDED:   { bg: 'bg-orange-50',  text: 'text-orange-700',  border: 'border-orange-200', dot: 'bg-orange-400' },
+    PENDING: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', dot: 'bg-yellow-400' },
+    PAID: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500' },
+    PROCESSING: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', dot: 'bg-purple-500' },
+    SHIPPED: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200', dot: 'bg-indigo-500' },
+    DELIVERED: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', dot: 'bg-green-500' },
+    CANCELLED: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', dot: 'bg-red-400' },
+    REFUNDED: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', dot: 'bg-orange-400' },
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -153,7 +153,12 @@ function OrderItemsRow({ order, colSpan }: { order: Order; colSpan: number }) {
                                 <p className="font-medium leading-none">{item.productName}</p>
                                 <p className="text-muted-foreground mt-0.5">
                                     x{item.quantity} · {fmtPrice(item.priceSnapshot)}
-                                    {item.discountSnapshot ? ` (−${item.discountSnapshot}%)` : ''}
+                                    {item.discountSnapshot ? ` (−R ${item.discountSnapshot})` : ''}
+                                </p>
+
+                                <p className="text-muted-foreground mt-0.5">
+                                    x{item.quantity} · {item.discountSnapshot ? ` (−${item.discountSnapshot}%)` : ''}
+
                                 </p>
                             </div>
                         </div>
@@ -268,11 +273,11 @@ export default function OrdersDashboard() {
         if (sortKey) {
             data.sort((a, b) => {
                 const av = sortKey === 'total' ? Number(a.total)
-                         : sortKey === 'date'  ? new Date(a.createdAt).getTime()
-                         : a.status.localeCompare(b.status)
+                    : sortKey === 'date' ? new Date(a.createdAt).getTime()
+                        : a.status.localeCompare(b.status)
                 const bv = sortKey === 'total' ? Number(b.total)
-                         : sortKey === 'date'  ? new Date(b.createdAt).getTime()
-                         : b.status.localeCompare(a.status)
+                    : sortKey === 'date' ? new Date(b.createdAt).getTime()
+                        : b.status.localeCompare(a.status)
                 return (av > bv ? 1 : -1) * sortDir
             })
         }
@@ -281,7 +286,7 @@ export default function OrdersDashboard() {
     }, [orders, filter, search, sortKey, sortDir])
 
     const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
-    const paginated  = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+    const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
     function handleSort(key: SortKey) {
         if (sortKey === key) setSortDir(d => d === 1 ? -1 : 1)
@@ -323,10 +328,10 @@ export default function OrdersDashboard() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-6 py-4 border-b border-border">
-                    <StatCard label="Total orders"  value={String(stats.total)}          sub="all time" />
-                    <StatCard label="Revenue"        value={fmtPrice(stats.revenue)}      sub="completed payments" />
-                    <StatCard label="Paid / Delivered" value={String(stats.paid)}         sub="fulfilled orders" />
-                    <StatCard label="Pending"        value={String(stats.pending)}        sub="awaiting payment" />
+                    <StatCard label="Total orders" value={String(stats.total)} sub="all time" />
+                    <StatCard label="Revenue" value={fmtPrice(stats.revenue)} sub="completed payments" />
+                    <StatCard label="Paid / Delivered" value={String(stats.paid)} sub="fulfilled orders" />
+                    <StatCard label="Pending" value={String(stats.pending)} sub="awaiting payment" />
                 </div>
 
                 {/* Filters + Search */}
@@ -354,8 +359,8 @@ export default function OrdersDashboard() {
                 {loading ? (
                     <div className="flex items-center justify-center py-16 text-sm text-muted-foreground gap-2">
                         <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity=".25"/>
-                            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity=".25" />
+                            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                         </svg>
                         Loading orders…
                     </div>

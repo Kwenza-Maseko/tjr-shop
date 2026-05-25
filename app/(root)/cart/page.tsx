@@ -1,23 +1,13 @@
 'use client'
 import config from "@/lib/config";
 import { IKImage, ImageKitProvider } from "imagekitio-next";
-import { useState, useEffect, JSXElementConstructor, ReactElement, ReactNode, ReactPortal } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Minus, Plus, RefreshCw, ShieldCheck, Trash2, Lock, Tag } from "lucide-react";
-import CheckoutPage from "@/components/CheckoutPage";
+import { Minus, Plus, RefreshCw, ShieldCheck, Trash2, Lock, Tag, ShoppingBasket } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+
+
 
 const { urlEndpoint, publicKey } = config.env.imagekit;
 
@@ -40,7 +30,6 @@ interface CartItem {
 const Cart = () => {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showCheckout, setShowCheckout] = useState(false);
 
     const router = useRouter();
     useEffect(() => {
@@ -206,17 +195,34 @@ const Cart = () => {
         const price = Number(item.priceSnapshot);
         const discount = item.discountSnapshot ? Number(item.discountSnapshot) : 0;
         const finalSavedAmount = price - discount;
-
         return finalSavedAmount * item.quantity
     }
 
-    if (loading) return <p className="p-6 text-gray-500">Loading cart...</p>;
-    if (cartItems.length === 0) return <p className="p-6 text-gray-500">Your cart is empty</p>;
+    const totalSaved = cartItems.reduce(
+        (total, item) => saved(item) - total,
+        0
+    );
+
+    if (loading) return <p className="p-6 text-gray-500 text-center">Loading cart...</p>;
+    if (cartItems.length === 0)
+        return (
+            <div className="flex flex-col justify-center items-center w-full mt-10">
+                <h1 className="text-xl font-semibold tracking-tight">Your Cart Is Empty</h1>
+                <Link href={"/store"} className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5 hover:underline">Continue Shopping</Link>
+                <div className="text-center py-16 text-muted-foreground text-sm">
+                    <ShoppingBasket className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                    You have no items on you bag yet.
+                </div>
+            </div>
+        );
 
     return (
         <div className='mt-8 px-6 md:px-8'>
             <ImageKitProvider urlEndpoint={urlEndpoint} publicKey={publicKey}>
                 <div className="space-y-4 pb-32 ">
+                    <div className='text-center'>
+                        <h1 className="text-xl font-semibold tracking-tight">My Cart</h1>
+                    </div>
                     {/* Items list */}
                     <div className="space-y-3 pb-4 md:pb-0">
                         <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-4">
@@ -301,13 +307,13 @@ const Cart = () => {
                                 <Tag className="w-3 h-3" />
                                 You Saved
                             </span>
-                            <span className="">{saved.toString()}</span>
+                            <span className="">R{totalSaved.toFixed(2)}</span>
                         </div>
 
 
                         <div className="flex justify-between text-sm text-muted-foreground">
                             <span>Delivery</span>
-                            <span className="text-green-600">TBD by runner</span>
+                            <span className="text-green-600">TJR runner</span>
                         </div>
                         <div className="flex justify-between text-sm font-semibold border-t border-border pt-3 mt-1">
                             <span>Total</span>
@@ -320,7 +326,7 @@ const Cart = () => {
                                 sessionStorage.setItem("checkout_total", JSON.stringify(cartSubtotal))
                                 router.push("/checkout")
                             }}
-                            className="w-full py-3 bg-black text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 hover:bg-black/80 transition-colors mt-2"
+                            className="w-full py-3 bg-black text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 hover:bg-black/80 transition-colors my-8"
                         >
                             <Lock className="w-4 h-4" />
                             Proceed to checkout

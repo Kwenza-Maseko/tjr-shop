@@ -1,9 +1,9 @@
 "use client"
 
-import { z, ZodType } from "zod"
-import { useForm, UseFormReturn, DefaultValues, SubmitHandler, FieldValues, Path, Resolver } from "react-hook-form"
+import { ZodType } from "zod"
+import { useForm, DefaultValues, SubmitHandler, FieldValues, Path, Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react" // Optional: loading icon
+import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,6 +21,7 @@ import { FIELD_NAMES, FIELD_TYPE } from '@/constants'
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation'
 import { $ZodType } from "zod/v4/core"
+import { Shield } from 'lucide-react';
 
 type AuthResponse = {
     success: boolean;
@@ -72,11 +73,14 @@ const AdminAuthForm = <T extends FieldValues>({
 
     return (
         <div className='w-[400px]  p-8 flex flex-col items-center gap-8'>
-
-            <div className='flex flex-col gap-2 text-center'>
-                <h3 className='font-bold text-xl text-gray-500'>Admin Auth</h3>
-
-                <p className='text-center text-gray-500'>{isSignedIn ? "Sign in to TJR Shop Panel" : "Create a new account an wait to be granted access"} </p>
+            <div className="p-2 rounded-md bg-zinc-100">
+                <Shield className="w-10 h-10 text-gray-500 " />
+            </div>
+            <div className='flex flex-col gap-2 text-center items-center'>
+                <div className="px-2 py-1 rounded-full bg-zinc-100 w-fit">
+                    <h3 className='font-medium text-gray-500 uppercase text-[12px]'>Admin Auth</h3>
+                </div>
+                <p className='text-center text-gray-500 text-lg font-semibold capitalize'>{isSignedIn ? "Sign in" : "Create a new account"} </p>
             </div>
 
             <Form {...form}>

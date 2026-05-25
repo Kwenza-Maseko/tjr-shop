@@ -15,7 +15,7 @@ import { useEffect, useState, useMemo } from "react"
 import { IKImage, ImageKitProvider } from "imagekitio-next"
 import { Calendar, Loader2, Tag, Percent, Search, X, ChevronLeft, ChevronRight } from "lucide-react"
 import config from "@/lib/config"
-import { createDeal, getDeals, getProductsWithDeals, linkDealToProduct } from "@/lib/store/deals"
+import { createDeal, getDeals, getProductsWithDeals, linkDealToProduct, unlinkDealFromProduct } from "@/lib/store/deals"
 import { toast } from "sonner"
 import {
     AlertDialog,
@@ -27,11 +27,8 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { DatePicker } from "@/components/Shop/DatePicker"
-import DealTimeSpanDisplay from "@/components/DealTimeSpanDisplay"
 
 const { urlEndpoint, publicKey } = config.env.imagekit
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Deal {
     id: string
@@ -44,13 +41,9 @@ interface ProductWithDeal extends ProductParams {
     dealId?: string | null
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const PAGE_SIZE = 8
 
 type FilterDeal = 'all' | 'with' | 'without'
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
     return (
@@ -171,32 +164,20 @@ function Pagination({
     )
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 const Discount = () => {
-    // Data
     const [products, setProducts] = useState<ProductWithDeal[]>([])
     const [deals, setDeals] = useState<Deal[]>([])
 
-    // UI state
     const [loading, setLoading] = useState(true)
     const [creating, setCreating] = useState(false)
     const [linking, setLinking] = useState(false)
-
-    // Form
     const [dealCoupon, setDealCoupon] = useState("")
     const [percentage, setPercentage] = useState("")
-
-    // Selection & filtering
     const [activeDealId, setActiveDealId] = useState<string | null>(null)
     const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
     const [search, setSearch] = useState("")
     const [filterDeal, setFilterDeal] = useState<FilterDeal>('all')
-
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1)
-
-    // ── Fetch data ────────────────────────────────────────────────────────────
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -215,8 +196,6 @@ const Discount = () => {
         }
         fetchAll()
     }, [])
-
-    // ── Derived state ─────────────────────────────────────────────────────────
 
     const filteredProducts = useMemo(() => {
         return products.filter(p => {
@@ -244,8 +223,6 @@ const Discount = () => {
         withoutDeal: products.filter(p => !p.dealCoupon).length,
         highest: deals.length ? Math.max(...deals.map(d => d.percentage)) : 0,
     }), [deals, products])
-
-    // ── Handlers ──────────────────────────────────────────────────────────────
 
     const handleCreateDeal = async () => {
         if (!dealCoupon.trim() || !percentage) return toast.error("Please fill in both fields")
@@ -280,15 +257,19 @@ const Discount = () => {
         }
     }
 
-    // Remove deal from a single product — add your server action here
     const handleRemoveDealFromProduct = async (productId: string) => {
-        // TODO: call your unlinkDealFromProduct server action
-        // const res = await unlinkDealFromProduct({ productId })
-        setProducts(prev => prev.map(p => p.id === productId ? { ...p, dealCoupon: null } : p))
-        toast.success("Deal removed")
+        const res = await unlinkDealFromProduct({ productId })
+
+        if (res.success) {
+            setProducts(prev => prev.map(p => p.id === productId ? { ...p, dealCoupon: null } : p))
+            toast.success("Deal removed")
+
+        } else {
+
+            toast.success("Failed to untlink deal")
+        }
     }
 
-    // Remove deal from all selected products
     const handleRemoveDealFromSelected = async () => {
         const ids = Array.from(selectedProducts)
         // TODO: batch call your server action for each or a batch endpoint
@@ -325,8 +306,6 @@ const Discount = () => {
         setCurrentPage(1)
     }
 
-    // ── Render ────────────────────────────────────────────────────────────────
-
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[40vh]">
@@ -341,7 +320,6 @@ const Discount = () => {
 
     return (
         <div className="bg-white">
-            <DealTimeSpanDisplay />
 
             <div className="px-4 md:px-8 pt-8 pb-12 max-w-7xl mx-auto">
                 {/* Stats */}
@@ -403,11 +381,28 @@ const Discount = () => {
                                     selected={activeDealId === deal.id}
                                     onClick={() => setActiveDealId(prev => prev === deal.id ? null : deal.id)}
                                     showDelete
-                                    onDelete={() => {
-                                        // TODO: call your deleteDeal server action
-                                        setDeals(prev => prev.filter(d => d.id !== deal.id))
-                                        if (activeDealId === deal.id) setActiveDealId(null)
-                                        toast.success("Deal deleted")
+                                    onDelete={async () => {
+                                        try {
+                                            const res = await fetch(`/api/discount/${deal.id}`, {
+                                                method: "DELETE",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify({ dealId: deal.id }),
+                                            });
+
+                                            if (!res.ok) throw new Error("Request failed");
+
+                                            const data = await res.json();
+                                            if (data.success) {
+                                                setDeals(prev => prev.filter(d => d.id !== deal.id));
+                                                if (activeDealId === deal.id) setActiveDealId(null);
+                                                toast.success("Deal deleted");
+                                            } else {
+                                                toast.error("Failed to delete deal");
+                                            }
+                                        } catch (error) {
+                                            setDeals(deals!);
+                                            toast.error("Failed to delete deal...");
+                                        }
                                     }}
                                 />
                             ))}
@@ -519,7 +514,7 @@ const Discount = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-muted/30 hover:bg-muted/30 text-[10px] uppercase tracking-widest">
-                                    
+
                                     <TableHead className="w-10">
                                         <input
                                             type="checkbox"
@@ -534,7 +529,6 @@ const Discount = () => {
                                     <TableHead>Type</TableHead>
                                     <TableHead>Category</TableHead>
                                     <TableHead>Price</TableHead>
-                                    <TableHead>Discounted</TableHead>
                                     <TableHead>Deal</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
@@ -583,11 +577,6 @@ const Discount = () => {
                                                     </TableCell>
                                                     <TableCell className="font-semibold text-gray-900 text-sm">
                                                         R{product.price?.toFixed(2) ?? "0.00"}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800 font-medium">
-                                                            R{product.discountPrice?.toFixed(2) ?? "0.00"}
-                                                        </span>
                                                     </TableCell>
                                                     <TableCell>
                                                         {product.dealCoupon ? (

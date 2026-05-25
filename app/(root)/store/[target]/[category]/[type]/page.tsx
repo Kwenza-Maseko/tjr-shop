@@ -42,7 +42,6 @@ export default function SubSubPage({ params }: Props) {
 
     const fetchProducts = useCallback(async () => {
         setLoading(true)
-
         try {
             const result = await getProductsByCategory(
                 formattedCategory,
@@ -163,13 +162,13 @@ export default function SubSubPage({ params }: Props) {
                                                 {product.productName}
                                             </p>
                                             {product.brand && (
-                                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 flex-shrink-0">
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 flex-shrink-0 capitalize">
                                                     {product.brand}
                                                 </span>
                                             )}
                                         </div>
 
-                                        <p className="text-[11px] text-muted-foreground truncate hidden md:block">
+                                        <p className="text-[11px] text-muted-foreground truncate hidden md:block capitalize">
                                             {product.productTarget}
                                         </p>
 

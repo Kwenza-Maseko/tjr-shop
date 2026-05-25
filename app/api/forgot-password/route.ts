@@ -4,7 +4,6 @@ import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/database/drizzle";
 import { adminTable, userTable } from "@/database/schema";
-import { hash } from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +13,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // Find user by email
     const user = await db
       .select()
       .from(userTable)
@@ -29,16 +27,12 @@ export async function POST(req: Request) {
 
 
     if (!user.length && !admin.length) {
-      // Don't reveal if email exists or not
       return NextResponse.json({ message: "If an account exists, an email was sent" });
     }
 
-    // Generate token
     const resetToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
     const resetTokenExpiry = new Date(Date.now() + 1000 * 60 * 60);
-
-    // Save hashed token and expiry
 
     if (user.length) {
       await db

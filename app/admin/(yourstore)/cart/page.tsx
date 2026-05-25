@@ -46,7 +46,6 @@ interface CartItem {
 type FilterType = 'all' | 'discounted' | 'high-qty'
 type SortKey = 'quantity' | 'price' | 'date' | null
 
-// ─── Avatar ───────────────────────────────────────────────────────────────────
 
 const AVATAR_COLORS = [
     { bg: '#E6F1FB', color: '#0C447C' },
@@ -105,6 +104,17 @@ function fmtPrice(n: number) {
     return 'R ' + n.toLocaleString('en-ZA')
 }
 
+function discountedPrice(discountPrice: number, qty: number) {
+    const totalDiscount = discountPrice * qty;
+    return 'R ' + totalDiscount.toLocaleString('en-ZA')
+}
+
+function finalCartPrice(price: number, qty: number) {
+    const totalPrice = price * qty;
+    return 'R ' + totalPrice.toLocaleString('en-ZA')
+}
+
+
 function fmtDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-ZA', {
         day: '2-digit',
@@ -152,7 +162,7 @@ export default function CartDashboard() {
         let data = [...items]
 
         if (filter === 'discounted') data = data.filter(i => i.discountSnapshot > 0)
-        if (filter === 'high-qty')   data = data.filter(i => i.quantity >= 2)
+        if (filter === 'high-qty') data = data.filter(i => i.quantity >= 2)
 
         if (search.trim()) {
             const q = search.toLowerCase()
@@ -166,11 +176,11 @@ export default function CartDashboard() {
         if (sortKey) {
             data.sort((a, b) => {
                 const av = sortKey === 'quantity' ? a.quantity
-                         : sortKey === 'price'    ? a.priceSnapshot
-                         : new Date(a.createdAt).getTime()
+                    : sortKey === 'price' ? a.priceSnapshot
+                        : new Date(a.createdAt).getTime()
                 const bv = sortKey === 'quantity' ? b.quantity
-                         : sortKey === 'price'    ? b.priceSnapshot
-                         : new Date(b.createdAt).getTime()
+                    : sortKey === 'price' ? b.priceSnapshot
+                        : new Date(b.createdAt).getTime()
                 return (av > bv ? 1 : -1) * sortDir
             })
         }
@@ -179,7 +189,7 @@ export default function CartDashboard() {
     }, [items, filter, search, sortKey, sortDir])
 
     const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
-    const paginated  = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+    const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
     function handleSort(key: SortKey) {
         if (sortKey === key) setSortDir(d => (d === 1 ? -1 : 1))
@@ -198,15 +208,10 @@ export default function CartDashboard() {
                 {/* Header */}
                 <div className="flex items-start justify-between px-6 py-5 border-b border-border">
                     <div>
-                        <h1 className="text-xl font-semibold tracking-tight">Cart Activity</h1>
                         <p className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5">
                             Items added to cart · all users
                         </p>
                     </div>
-                    <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-                        Live
-                    </Badge>
                 </div>
 
                 {/* Stats */}
@@ -258,8 +263,8 @@ export default function CartDashboard() {
                 {loading ? (
                     <div className="flex items-center justify-center py-16 text-sm text-muted-foreground gap-2">
                         <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity=".25"/>
-                            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity=".25" />
+                            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                         </svg>
                         Loading cart items…
                     </div>
@@ -279,9 +284,10 @@ export default function CartDashboard() {
                                         className="text-[10px] uppercase tracking-widest cursor-pointer select-none"
                                         onClick={() => handleSort('price')}
                                     >
-                                       Unit Price <SortIndicator k="price" />
+                                        Unit Price <SortIndicator k="price" />
                                     </TableHead>
                                     <TableHead className="text-[10px] uppercase tracking-widest">Discount</TableHead>
+                                    <TableHead className="text-[10px] uppercase tracking-widest">Total</TableHead>
                                     <TableHead
                                         className="text-[10px] uppercase tracking-widest cursor-pointer select-none"
                                         onClick={() => handleSort('date')}
@@ -300,16 +306,14 @@ export default function CartDashboard() {
                                     </TableRow>
                                 ) : paginated.map(item => {
                                     const productName = item.product?.name ?? item.productId
-                                    const user        = item.user
-                                    const discounted  = item.discountSnapshot > 0
-                                    const finalPrice  = discounted
-                                        ? Math.round(item.priceSnapshot * (1 - item.discountSnapshot / 100))
+                                    const user = item.user
+                                    const discounted = item.discountSnapshot > 0
+                                    const finalPrice = discounted
+                                        ? Math.round(item.priceSnapshot - (item.discountSnapshot))
                                         : null
 
                                     return (
                                         <TableRow key={item.id} className="group">
-
-                                            {/* Product */}
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 border border-border">
@@ -352,11 +356,24 @@ export default function CartDashboard() {
                                             {/* Discount */}
                                             <TableCell>
                                                 {discounted ? (
-                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 font-medium">
-                                                        −{item.discountSnapshot}%
+                                                    <span className="text-sm">
+                                                        -{item.discountSnapshot}
                                                     </span>
                                                 ) : (
                                                     <span className="text-muted-foreground text-sm">—</span>
+                                                )}
+                                            </TableCell>
+
+                                             {/* Total Price */}
+                                            <TableCell>
+                                                {discounted ? (
+                                                    <span className="text-sm">
+                                                        {discountedPrice(item.discountSnapshot, item.quantity)}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-sm">
+                                                        {finalCartPrice(item.priceSnapshot, item.quantity)}
+                                                    </span>
                                                 )}
                                             </TableCell>
 

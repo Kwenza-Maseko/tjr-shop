@@ -207,8 +207,6 @@ export const getNavProductTypes = async (): Promise<Record<string, string[]>> =>
       productTable.productType
     )
 
-  console.log("📦 Raw rows:", rows)
-
   return rows.reduce<Record<string, string[]>>((acc, row) => {
     const target = row.productTarget!.toLowerCase().trim()  // "men"
     const category = row.category!.trim()                   // "Clothing"

@@ -1,9 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Bell, Crown, Search, Shield, ShoppingCart, X } from 'lucide-react';
+import { Bell, Crown, Shield, X } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
 import Notifications from './Notifications';
 import { ungrantedAccessAdmins } from '@/lib/adminDetails/users';
 import { AdminParams } from '@/types';

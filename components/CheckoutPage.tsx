@@ -132,7 +132,7 @@ const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
           })),
           deliveryAddress: selectedShipping === "delivery" ? deliveryAddress : null,
           customer: {
-            id: user?.id,       // ✅ needed to insert order and clear cart
+            id: user?.id,
             email: user?.email,
             name: user?.name,
           }
@@ -169,13 +169,13 @@ const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
         <h1 className="text-lg font-bold">Checkout</h1>
 
         <div className="p-6 rounded-md bg-zinc-100 w-full text-center">
-          <p>Total</p>
+          <p className="text-[12px] uppercase tracking-widest text-muted-foreground mb-2">Total</p>
           <p className="text-lg font-bold">R{cartSubtotal.toFixed(2)}</p>
         </div>
 
         <div className="w-full mt-6 bg-white p-4 rounded-md space-y-8">
 
-          <h1 className="mb-4 font-bold">CONTACT</h1>
+          <h1 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-4">CONTACT</h1>
 
           <div className="space-y-1 text-sm">
             <div className="flex gap-2 items-center">
@@ -191,9 +191,9 @@ const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
           {/* PAYMENT */}
           <div className="space-y-4">
             <div>
-              <div className="flex gap-1 items-center">
-                <h1 className="font-bold">PAYMENT</h1>
-                <Lock className="w-3.5 text-zinc-400" />
+              <div className="flex gap-1 items-center mb-4">
+                <h1 className="text-[11px] uppercase tracking-widest text-muted-foreground">PAYMENT</h1>
+                <Lock className="w-3 text-zinc-400" />
               </div>
               <p className="text-green-500 text-sm">Secure payment via PayFast</p>
             </div>
@@ -229,7 +229,7 @@ const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
             {selectedShipping === "delivery" && (
               <div className="border border-zinc-200 rounded-md p-4 space-y-4">
 
-                <div className="flex items-center gap-2 text-sm font-semibold">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground mb-4">
                   <MapPin className="w-4 h-4" />
                   Delivery Address
                 </div>
