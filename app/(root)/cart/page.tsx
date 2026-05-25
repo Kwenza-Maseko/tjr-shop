@@ -22,7 +22,8 @@ interface CartItem {
     priceSnapshot: string;
     discountSnapshot?: string | null;
 
-    selectedOptions?: any | null;
+    selectedOptions?: Record<string, string> | null;
+
     isActive?: boolean;
     createdAt?: Date | null;
     updatedAt?: Date | null;

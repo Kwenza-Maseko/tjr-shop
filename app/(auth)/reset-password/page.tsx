@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
@@ -52,7 +52,7 @@ const ResetPassword = () => {
         toast.error(data.error || "Failed to reset password")
       }
     } catch (err) {
-      toast.error("Network error. Please try again.")
+      toast.error(`Network error. Please try again.", ${err}`)
     } finally {
       setLoading(false)
     }

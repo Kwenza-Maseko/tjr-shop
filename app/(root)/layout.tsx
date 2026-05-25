@@ -1,6 +1,6 @@
-import ClientNavbar from '@/components/ClientNavbar';
-import Footer from '@/components/Footer';
+
 import Navbar from '@/components/Navbar';
+import { CartProvider } from '@/components/providers/CartProvider';
 import { db } from '@/database/drizzle';
 import { userTable } from '@/database/schema';
 import { auth } from '@/userAuth';
@@ -33,10 +33,12 @@ const Layout = async ({ children }: { children: ReactNode }) => {
 
     return (
         <div>
-            <Navbar />
-            <div className='pt-[40px]'>
-                {children}
-            </div>
+            <CartProvider>
+                <Navbar />
+                <div className='pt-[40px]'>
+                    {children}
+                </div>
+            </CartProvider>
         </div>
     )
 }

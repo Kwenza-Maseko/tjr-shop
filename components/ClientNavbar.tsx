@@ -7,6 +7,7 @@ import { signOut } from 'next-auth/react'
 import Notifications from './Notifications'
 import Image from 'next/image'
 import NavSearch from './NavbarSearch'
+import { useCart } from './providers/CartProvider'
 
 interface SidebarProps {
     session: Session | null
@@ -49,6 +50,8 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
     const [selectedSub, setSelectedSub] = useState<any>(null)
     const [isNotificationOpen, setIsNotificationOpen] = useState(false)
     const [hoveredTarget, setHoveredTarget] = useState<string | null>(null)
+
+    const { cartCount } = useCart()
 
     const goBack = () => {
         if (level === 3) { setLevel(2); setSelectedSub(null) }
@@ -138,11 +141,22 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
 
                 {/* ── Right icons ── */}
                 <div className="flex gap-3 items-center">
-                    <NavSearch /> 
+                    <NavSearch />
                     {session?.user && (
                         <div className="flex items-center gap-3 relative">
-                            <Link href="/cart">
-                                <ShoppingCart className="w-5 h-5 text-zinc-600" />
+                            <Link href="/cart" className="relative inline-flex">
+                                <ShoppingCart
+                                    className="w-5 h-5 text-zinc-600"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden="true"
+                                />
+
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[10px] font-medium min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center leading-none">
+                                        {cartCount > 99 ? "99+" : cartCount}
+                                    </span>
+                                )}
                             </Link>
                             <Bell
                                 className="w-5 h-5 text-zinc-600 cursor-pointer"
