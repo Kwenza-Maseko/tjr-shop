@@ -176,7 +176,7 @@ export default function NavSearch() {
                             onClick={handleResultClick}
                             className="flex items-center justify-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-800 py-1.5 transition-colors"
                         >
-                            View all results for "{query}"
+                            View all results for &quot;{query}&quot;
                         </Link>
                     </div>
                 </div>
@@ -185,7 +185,7 @@ export default function NavSearch() {
             {/* No results state */}
             {open && results.length === 0 && !loading && query.length >= 2 && (
                 <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-zinc-200 rounded-xl shadow-lg z-[200] p-6 text-center">
-                    <p className="text-sm text-zinc-400">No products found for "{query}"</p>
+                    <p className="text-sm text-zinc-400">No products found for &quot;{query}&quot;</p>
                 </div>
             )}
         </div>

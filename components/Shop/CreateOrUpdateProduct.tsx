@@ -702,7 +702,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                                                         className="w-full h-7 text-xs"
                                                                         onClick={() => { field.onChange(customBrand); setBrandOpen(false) }}
                                                                     >
-                                                                        Add "{customBrand}"
+                                                                        Add &quot;{customBrand}&quot;
                                                                     </Button>
                                                                 </div>
                                                             </CommandEmpty>

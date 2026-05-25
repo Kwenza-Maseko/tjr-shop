@@ -199,7 +199,7 @@ const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
             </div>
 
             <div className="bg-zinc-100 rounded-md p-4 text-center text-sm text-gray-600">
-              You'll be redirected to PayFast to complete your payment.
+              You&lsquo;ll be redirected to PayFast to complete your payment.
             </div>
 
             {/* SHIPPING METHOD */}

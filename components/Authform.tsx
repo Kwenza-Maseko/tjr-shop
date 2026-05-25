@@ -130,7 +130,7 @@ const AuthForm = <T extends FieldValues>({
 
 
             {isSignedIn ? <div className="flex gap-1 text-gray-600 text-sm">
-                <p>You don't have an account?</p>
+                <p>You don&lsquo;t have an account?</p>
                 <Link
                     href={"/sign-up"}
                     className='text-gray-400 underline'

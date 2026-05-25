@@ -96,7 +96,7 @@ const ImageUpload = ({
                 onClick={(e) => {
                     e.preventDefault();
                     if (ikUploadRef.current) {
-                        //@ts-ignore
+                        //@ts-expect-error
                         ikUploadRef.current?.click();
                     }
                 }}
