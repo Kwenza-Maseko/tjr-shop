@@ -105,7 +105,7 @@ const ProductClient = ({ userId }: { userId: string }) => {
                     </div>
 
                     <div className="flex flex-col xl:flex-row gap-6">
-                        <div className="space-y-5 w-[450px]">
+                        <div className="space-y-5 w-full md:w-[450px]">
                             <div >
                                 <div className="lg:block hidden">
                                     <h1 className="text-xl font-semibold">{product.productName}</h1>
@@ -144,7 +144,6 @@ const ProductClient = ({ userId }: { userId: string }) => {
                             </div>
 
                             <div className="w-full h-[1px] bg-gray-300 " />
-
                             {/* 🎨 Color Selection */}
                             <div>
                                 <h3 className="text-md font-semibold mb-4">
@@ -157,7 +156,6 @@ const ProductClient = ({ userId }: { userId: string }) => {
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
                                     {(() => {
-                                        // Get colors from variants if available, fall back to product.color
                                         const variantColors = product.variants?.colors as string[] | undefined
                                         const colors = variantColors?.length
                                             ? variantColors
@@ -206,9 +204,7 @@ const ProductClient = ({ userId }: { userId: string }) => {
                                 </div>
                             </div>
 
-
-
-                            <div className="space-y-1">
+                            <div className="space-y-1 w-full">
                                 <Button
                                     className="w-full py-6"
                                     disabled={!selectedColor || !selectedSize}
