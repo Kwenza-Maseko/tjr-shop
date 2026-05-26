@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Shield, Clock, CheckCircle2, XCircle, Crown } from 'lucide-react'
 
 interface AdminParams {
@@ -118,9 +118,9 @@ const ManageAccountComponent = ({ user }: { user: AdminParams }) => {
       {/* Account details */}
       <div className="bg-white rounded-xl border border-black/5 divide-y divide-border">
         {[
-          { label: 'Full name',  value: user.fullName },
-          { label: 'Email',      value: user.email },
-          { label: 'Role',       value: user.adminRole ?? '—' },
+          { label: 'Full name', value: user.fullName },
+          { label: 'Email', value: user.email },
+          { label: 'Role', value: user.adminRole ?? '—' },
         ].map(row => (
           <div key={row.label} className="flex items-center justify-between px-4 py-3">
             <p className="text-[11px] uppercase tracking-widest text-muted-foreground w-28 flex-shrink-0">

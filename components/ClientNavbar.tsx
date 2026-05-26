@@ -175,15 +175,48 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
                             </div>
 
                             {dropdown && (
-                                <div className="absolute right-0 top-10 w-60 truncate bg-white z-50 space-y-4 custom-light-shadow-box p-1">
-                                    <div className="p-3 text-gray-600 rounded bg-zinc-100">{session.user.name}</div>
-                                    <div className='flex flex-col gap-4'>
-                                        <Link href={`/account/${session.user.id}/track`} className='px-3'>Track Order</Link>
-                                        <Link href={`/account/${session.user.id}/manage-account`} className='px-3'>Manage Account</Link>
-                                    </div>
-                                    <div className="border-t p-3 flex gap-2 text-red-600 cursor-pointer" onClick={() => signOut()}>
-                                        <LogOut className='w-4 h-4' />
-                                        <p>Logout</p>
+                                <div
+                                    className="fixed bg-black/70 right-0 top-0 bottom-0 h-screen flex justify-end left-0"
+                                    onClick={() => setDropdown(false)}
+                                >
+                                    <div
+                                        className="h-full w-full md:w-96 bg-white p-4"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <div className='mb-3 text-end text-muted-foreground cursor-pointer'
+                                        onClick={() => setDropdown(false)}>
+                                            x
+                                        </div>
+                                        <div className="p-3 text-gray-600 rounded bg-zinc-100">
+                                            <p>{session.user.name}</p>
+                                            <p className='text-xs text-muted-foreground truncate'>{session.user.email}</p>
+                                        </div>
+
+                                        <div className="flex flex-col gap-4 mt-4">
+                                            <Link
+                                                href={`/account/track`}
+                                                onClick={() => setDropdown(false)}
+                                                className="px-3"
+                                            >
+                                                Track Order
+                                            </Link>
+
+                                            <Link
+                                                href={`/account/manage-account`}
+                                                onClick={() => setDropdown(false)}
+                                                className="px-3"
+                                            >
+                                                Manage Account
+                                            </Link>
+                                        </div>
+
+                                        <div
+                                            className="border-t p-3 flex gap-2 mt-4 text-red-600 cursor-pointer"
+                                            onClick={() => signOut()}
+                                        >
+                                            <LogOut className="w-4 h-4" />
+                                            <p>Logout</p>
+                                        </div>
                                     </div>
                                 </div>
                             )}

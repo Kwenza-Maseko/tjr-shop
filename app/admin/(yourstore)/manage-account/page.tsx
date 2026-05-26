@@ -4,7 +4,6 @@ import { db } from '@/database/drizzle';
 import { adminTable } from '@/database/schema';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
-import React from 'react'
 
 const ManageAccount = async () => {
     const session = await auth();
