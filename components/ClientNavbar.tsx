@@ -145,10 +145,10 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
                 </ul>
 
                 {/* ── Right icons ── */}
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-4 items-center">
                     <NavSearch />
                     {session?.user && (
-                        <div className="flex items-center gap-3 relative">
+                        <div className="flex items-center gap-4 relative">
                             <Link href="/cart" className="relative inline-flex">
                                 <ShoppingCart
                                     className="w-5 h-5 text-zinc-600"
@@ -168,7 +168,7 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
                                 onClick={() => setIsNotificationOpen(p => !p)}
                             />
                             <div
-                                className="w-[30px] h-[30px] rounded-full flex items-center justify-center bg-gray-300 border border-gray-500 text-xs font-bold cursor-pointer"
+                                className="w-[25px] h-[25px] rounded-full flex items-center justify-center bg-gray-300 border border-gray-500 text-xs font-bold cursor-pointer"
                                 onClick={() => setDropdown(p => !p)}
                             >
                                 {getInitials(session.user.name || '')}
@@ -225,7 +225,7 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
 
                     {/* Mobile hamburger */}
                     <div
-                        className="space-y-1.5 w-6 cursor-pointer md:hidden"
+                        className="space-y-1.5 w-5.5 cursor-pointer md:hidden"
                         onClick={() => setMenuDropdown(p => !p)}
                     >
                         <div className='w-full h-0.5 bg-zinc-600' />
