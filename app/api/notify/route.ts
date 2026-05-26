@@ -3,6 +3,31 @@ import { cartTable, ordersTable, pendingOrdersTable } from "@/database/schema"
 import { eq, lt } from "drizzle-orm"
 import crypto from "crypto"
 
+interface PendingOrderData {
+  amount: string | number
+  shipping_method: string
+  cartItems: {
+    productId: string
+    productName: string
+    imageUrl: string
+    quantity: number
+    priceSnapshot: number
+    discountSnapshot: number | null
+  }[]
+  deliveryAddress: {
+    streetAddress: string
+    suburb: string
+    city: string
+    province: string
+    postalCode: string
+  } | null
+  customer: {
+    id: string
+    name: string
+    email: string
+  }
+}
+
 function verifyPayfastSignature(data: Record<string, string>, passphrase: string): boolean {
   const phpEncode = (val: string) =>
     encodeURIComponent(val)
@@ -13,7 +38,7 @@ function verifyPayfastSignature(data: Record<string, string>, passphrase: string
   const { signature, ...rest } = data
 
   const queryString = Object.entries(rest)
-    .filter(([, v]) => v !== "") 
+    .filter(([, v]) => v !== "")
     .map(([k, v]) => `${k}=${phpEncode(v.trim())}`)
     .join("&")
 
@@ -89,9 +114,8 @@ export async function POST(req: Request) {
       return new Response("Pending order not found", { status: 404 })
     }
 
-    const { shipping_method, cartItems, deliveryAddress, customer } = pending.data as any
+    const pendingData = pending.data as PendingOrderData
 
-    const pendingData = pending.data as any
     if (Number(amount_gross) !== Number(pendingData.amount)) {
       console.error("Amount mismatch — possible tampering:", {
         expected: pendingData.amount,
@@ -99,6 +123,8 @@ export async function POST(req: Request) {
       })
       return new Response("Amount mismatch", { status: 400 })
     }
+
+    const { shipping_method, cartItems, deliveryAddress, customer } = pendingData
 
     const [order] = await db
       .insert(ordersTable)

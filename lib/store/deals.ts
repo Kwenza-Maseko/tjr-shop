@@ -137,13 +137,13 @@ export const linkDealToProduct = async ({ dealId, productIds }: LinkDealParams) 
 
 export const unlinkDealFromProduct = async ({ productId }: unLinkDealParams) => {
     try {
-        if ( productId.length === 0) {
+        if (productId.length === 0) {
             throw new Error("Missing dealId or productIds");
         }
 
-            await db
-                .delete(dealProducts)
-                .where(eq(dealProducts.productId, productId));
+        await db
+            .delete(dealProducts)
+            .where(eq(dealProducts.productId, productId));
 
         return {
             success: true,
@@ -202,7 +202,7 @@ export const getProductsWithDeals = async (): Promise<(ProductParams & { dealCou
         reviewCount: item.reviewCount ?? 0,
         isActive: item.isActive ?? true,
         relatedProducts: (item.relatedProducts as string[] | null) ?? [],
-        variants: (item.variants as Record<string, any> | null) ?? {},
+        variants: (item.variants as Record<string, string[]> | null) ?? null,
         dealCoupon: item.dealCoupon ?? null,
     }));
 };
@@ -397,7 +397,7 @@ export const getProductsByCategory = async (
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-            variants: (r.variants as VariantsType | null) ?? {},
+            variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
         })),
@@ -483,7 +483,7 @@ export const getAllProducts = async (
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-            variants: (r.variants as VariantsType | null) ?? {},
+            variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
         })),
@@ -571,7 +571,7 @@ export const getAllTargetedProducts = async (
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-            variants: (r.variants as VariantsType | null) ?? {},
+            variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
         })),
@@ -662,7 +662,7 @@ export const getAllProductsType = async (
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-            variants: (r.variants as VariantsType | null) ?? {},
+            variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
         })),
@@ -718,7 +718,7 @@ export const getProductById = async (id: string): Promise<ProductWithDeal | null
         stock: r.stock ?? 0,
         isActive: r.isActive ?? true,
         relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-        variants: (r.variants as VariantsType | null) ?? {},
+        variants: (r.variants as Record<string, string[]> | null) ?? null,
         brand: r.brand ?? null,
         dealCoupon: r.dealCoupon ?? null,
         dealPercentage: r.dealPercentage ?? null,

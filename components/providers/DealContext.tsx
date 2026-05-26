@@ -3,12 +3,39 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getDealsWithTimeSpan } from "@/lib/store/deals";
 
+interface TimeSpan {
+    id: string
+    timeSpan: string | Date | null
+}
+
+interface DealProduct {
+    id: string
+    productName: string | null
+    imageUrl: string | null
+    price: string | null
+    discountPrice: string | null
+    rating: string | null
+    reviewCount: number | null
+}
+
+interface Deal {
+    id: string
+    dealCoupon: string
+    percentage: number
+    timeSpans: TimeSpan[]
+    products: DealProduct[]
+}
+
+interface ActiveTimeSpan extends TimeSpan {
+    dealId: string
+}
+
 export type DealsContextType = {
-    dealTimeSpan: any | null;
-    expired: boolean;
-    deals: any[];
-    loading: boolean;
-};
+    dealTimeSpan: ActiveTimeSpan | null
+    expired: boolean
+    deals: Deal[]
+    loading: boolean
+}
 
 export const DealsContext = createContext<DealsContextType>({
     dealTimeSpan: null,
@@ -18,9 +45,9 @@ export const DealsContext = createContext<DealsContextType>({
 });
 
 export const DealsProvider = ({ children }: { children: React.ReactNode }) => {
-    const [dealTimeSpan, setDealTimeSpan] = useState<any | null>(null);
+    const [dealTimeSpan, setDealTimeSpan] = useState<ActiveTimeSpan | null>(null);
     const [expired, setExpired] = useState(false);
-    const [deals, setDeals] = useState<any[]>([]);
+    const [deals, setDeals] = useState<Deal[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -28,25 +55,26 @@ export const DealsProvider = ({ children }: { children: React.ReactNode }) => {
             const res = await getDealsWithTimeSpan();
 
             if (res.success) {
-                // TS SAFE
-                const data = res.data ?? [];
+                const data = (res.data ?? []) as Deal[];
 
                 setDeals(data);
 
-                // extract all future timespans
                 const allTimes = data
-                    .flatMap((d: any) =>
+                    .flatMap((d: Deal) =>
                         Array.isArray(d.timeSpans)
-                            ? d.timeSpans.map((t: any) => ({
+                            ? d.timeSpans.map((t: TimeSpan) => ({
                                   dealId: d.id,
                                   ...t,
                               }))
                             : []
                     )
-                    .filter((t: any) => new Date(t.timeSpan).getTime() > Date.now())
+                    .filter((t: ActiveTimeSpan) =>
+                        t.timeSpan !== null &&
+                        new Date(t.timeSpan).getTime() > Date.now()
+                    )
                     .sort(
-                        (a, b) =>
-                            new Date(a.timeSpan).getTime() - new Date(b.timeSpan).getTime()
+                        (a: ActiveTimeSpan, b: ActiveTimeSpan) =>
+                            new Date(a.timeSpan!).getTime() - new Date(b.timeSpan!).getTime()
                     );
 
                 if (allTimes.length > 0) {
@@ -60,7 +88,6 @@ export const DealsProvider = ({ children }: { children: React.ReactNode }) => {
         fetchData();
     }, []);
 
-    // countdown watcher
     useEffect(() => {
         if (!dealTimeSpan?.timeSpan) return;
 

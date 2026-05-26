@@ -57,10 +57,13 @@ export const signUp = async (params: AuthCredentails) => {
 
     await signInWithCredentials({ email, password })
     return { success: true }
-  } catch (error: any) {
-    if (error?.code === "23505") {
+  } catch (error: unknown) {
+    const dbError = error as { code?: string }
+
+    if (dbError?.code === "23505") {
       return { success: false, error: "User already exists" }
     }
+
     console.error("Signup error:", error)
     return { success: false, error: "Signup error" }
   }

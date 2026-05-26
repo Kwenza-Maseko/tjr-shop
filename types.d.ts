@@ -69,7 +69,7 @@ export interface ProductParams {
   reviewCount: number
   isActive: boolean
   relatedProducts: string[] | null
-  variants: Record<string, unknown>
+  variants: Record<string, string[]> | null
   brand: string | null
 }
 

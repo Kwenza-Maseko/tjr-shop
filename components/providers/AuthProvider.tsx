@@ -3,10 +3,18 @@
 import React, { createContext, useContext } from "react";
 import { SessionProvider, useSession } from "next-auth/react";
 
+interface AuthUser {
+  id: string
+  name?: string | null
+  email?: string | null
+  image?: string | null
+  role?: string
+}
+
 type AuthContextType = {
-  user: any;
-  loading: boolean;
-};
+  user: AuthUser | null
+  loading: boolean
+}
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -19,7 +27,7 @@ function AuthUserProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user: session?.user ?? null,
+        user: session?.user as AuthUser ?? null,
         loading: status === "loading",
       }}
     >
@@ -28,11 +36,7 @@ function AuthUserProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ProviderWrapper({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ProviderWrapper({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <AuthUserProvider>{children}</AuthUserProvider>

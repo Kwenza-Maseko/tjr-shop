@@ -129,7 +129,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
             reviewCount: productToEdit?.reviewCount ?? 0,
             isActive: productToEdit?.isActive ?? true,
             relatedProducts: productToEdit?.relatedProducts ?? null,
-            variants: productToEdit?.variants ?? null,
+            variants: (productToEdit?.variants as Record<string, string[]> | null) ?? null,
             brand: productToEdit?.brand ?? null,
         },
     })
@@ -174,7 +174,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
             form.reset({
                 id: '', productName: '', imageUrl: '', description: null,
                 productTarget: '', productType: null, color: null,
-                price: '' as any, discountPrice: null, stock: 0, sku: '',
+                price: '', discountPrice: null, stock: 0, sku: '',
                 category: null, tags: null, weight: null, dimensions: null,
                 rating: null, reviewCount: 0, isActive: true,
                 relatedProducts: null, variants: null, brand: null,
@@ -210,7 +210,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
             reviewCount: values.reviewCount ?? 0,
             isActive: values.isActive ?? true,
             relatedProducts: values.relatedProducts ?? null,
-            variants: values.variants ?? null,
+            variants: (values.variants as Record<string, string[]> | null) ?? null,
             brand: values.brand ?? null,
         }
 
