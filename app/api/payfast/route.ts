@@ -1,4 +1,4 @@
-// app/api/payfast/route.ts
+
 import { db } from "@/database/drizzle"
 import { pendingOrdersTable } from "@/database/schema"
 import crypto from "crypto"
@@ -43,8 +43,6 @@ export async function POST(req: Request) {
       customer,
     }
 
-    // Just replace the db.insert block with this
-    // /api/payfast — update the pendingOrdersTable insert
     await db.insert(pendingOrdersTable).values({
       id: paymentId,
       data: {
@@ -59,9 +57,9 @@ export async function POST(req: Request) {
     const data: Record<string, string> = {
       merchant_id: merchant_id.trim(),
       merchant_key: merchant_key.trim(),
-      return_url: "https://x2cpx5sn-3000.inc1.devtunnels.ms/success",
-      cancel_url: "https://x2cpx5sn-3000.inc1.devtunnels.ms/cancel",
-      notify_url: "https://x2cpx5sn-3000.inc1.devtunnels.ms/api/notify",
+      return_url: "https://tjr-shop.vercel.app/success",
+      cancel_url: "https://tjr-shop.vercel.app/cancel",
+      notify_url: "https://tjr-shop.vercel.app/api/notify",
       name_first,
       name_last,
       email_address: (customer?.email || "tjrshoponlinecustomer@tjr.com").trim(),
