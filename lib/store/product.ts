@@ -17,9 +17,7 @@ export const getStoreProducts = async (
       .from(productTable)
       .where(
         and(
-          (
-            eq(productTable.productType, productType)
-          ),
+          eq(productTable.productType, productType),
           or(
             eq(productTable.productTarget, productTarget),
             eq(productTable.productType, "unisex")
@@ -41,8 +39,7 @@ export const getStoreProducts = async (
     productType: item.productType ?? null,
     color: item.color ?? null,
     price: Number(item.price),
-    discountPrice:
-      item.discountPrice !== null ? Number(item.discountPrice) : null,
+    discountPrice: item.discountPrice !== null ? Number(item.discountPrice) : null,
     stock: item.stock ?? 0,
     sku: item.sku,
     category: item.category ?? null,
@@ -53,18 +50,17 @@ export const getStoreProducts = async (
     reviewCount: item.reviewCount ?? 0,
     isActive: item.isActive ?? true,
     relatedProducts: (item.relatedProducts as string[] | null) ?? [],
-    variants: (item.variants as Record<string, any> | null) ?? {},
+    variants: (item.variants as Record<string, string[]> | null) ?? {},
     brand: item.brand ?? null,
   }));
 };
-
 
 export const getLatestProducts = async (): Promise<ProductParams[] | null> => {
   const result = await db.select().from(productTable).limit(2);
 
   if (result.length === 0) return null;
 
-  const mapped = result.map((item) => ({
+  return result.map((item) => ({
     id: item.id,
     productName: item.productName,
     imageUrl: item.imageUrl,
@@ -72,28 +68,21 @@ export const getLatestProducts = async (): Promise<ProductParams[] | null> => {
     productTarget: item.productTarget,
     productType: item.productType ?? null,
     color: item.color ?? null,
-
-    price: Number(item.price), // convert string -> number
+    price: Number(item.price),
     discountPrice: item.discountPrice !== null ? Number(item.discountPrice) : null,
     stock: item.stock ?? 0,
     sku: item.sku,
-
     category: item.category ?? null,
     tags: item.tags ?? null,
-
     weight: item.weight !== null ? Number(item.weight) : null,
     dimensions: item.dimensions ?? null,
-
     rating: item.rating !== null ? Number(item.rating) : 0,
     reviewCount: item.reviewCount ?? 0,
-
     isActive: item.isActive ?? true,
     relatedProducts: (item.relatedProducts as string[] | null) ?? [],
-    variants: (item.variants as Record<string, any> | null) ?? {},
-    brand: item.brand ?? null
+    variants: (item.variants as Record<string, string[]> | null) ?? {},
+    brand: item.brand ?? null,
   }));
-
-  return mapped;
 };
 
 
@@ -109,25 +98,19 @@ export async function createOrUpdateProduct(payload: ProductParams) {
       productTarget: payload.productTarget,
       productType: payload.productType ?? null,
       color: payload.color ?? null,
-      price: String(payload.price),              
-      discountPrice: payload.discountPrice != null
-        ? String(payload.discountPrice)
-        : null,
-      stock: payload.stock ?? 0,                  
+      price: String(payload.price),
+      discountPrice: payload.discountPrice != null ? String(payload.discountPrice) : null,
+      stock: payload.stock ?? 0,
       sku: payload.sku,
       category: payload.category ?? null,
       tags: payload.tags ?? null,
-      weight: payload.weight != null
-        ? String(payload.weight)
-        : null,
+      weight: payload.weight != null ? String(payload.weight) : null,
       dimensions: payload.dimensions ?? null,
-      rating: payload.rating != null
-        ? String(payload.rating)
-        : '0',
+      rating: payload.rating != null ? String(payload.rating) : '0',
       reviewCount: payload.reviewCount ?? 0,
       isActive: payload.isActive ?? true,
-      relatedProducts: payload.relatedProducts ?? null,    
-      variants: payload.variants ?? null,           
+      relatedProducts: payload.relatedProducts ?? null,
+      variants: payload.variants ?? null,
       brand: payload.brand ?? null,
     }
 
@@ -148,10 +131,12 @@ export async function createOrUpdateProduct(payload: ProductParams) {
 
     return { success: true, data: created, action: 'created' }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('createOrUpdateProduct error:', error)
 
-    if (error?.message?.includes('unique') || error?.code === '23505') {
+    const dbError = error as { message?: string; code?: string }
+
+    if (dbError?.message?.includes('unique') || dbError?.code === '23505') {
       return { success: false, message: 'A product with this SKU already exists' }
     }
 
@@ -208,11 +193,11 @@ export const getNavProductTypes = async (): Promise<Record<string, string[]>> =>
     )
 
   return rows.reduce<Record<string, string[]>>((acc, row) => {
-    const target = row.productTarget!.toLowerCase().trim()  // "men"
-    const category = row.category!.trim()                   // "Clothing"
-    const type = row.productType!.trim()                    // "Hoodies and Sweatshirts"
+    const target = row.productTarget!.toLowerCase().trim()
+    const category = row.category!.trim()
+    const type = row.productType!.trim()
 
-    const key = `${target}__${category}`                    // "men__Clothing"
+    const key = `${target}__${category}`
     if (!acc[key]) acc[key] = []
     if (!acc[key].includes(type)) acc[key].push(type)
     return acc

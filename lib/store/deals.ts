@@ -28,6 +28,35 @@ interface LinkDealParams {
 interface unLinkDealParams {
     productId: string;
 }
+
+
+interface GroupedTimeSpan {
+    id: string
+    timeSpan: Date | string | null
+}
+
+interface GroupedProduct {
+    id: string
+    productName: string | null
+    imageUrl: string | null
+    price: string | null
+    discountPrice: string | null
+    rating: string | null
+    reviewCount: number | null
+}
+
+interface GroupedDeal {
+    id: string
+    dealCoupon: string
+    percentage: number
+    timeSpans: GroupedTimeSpan[]
+    products: GroupedProduct[]
+}
+
+type GroupedDealsAcc = Record<string, GroupedDeal>
+
+type VariantsType = Record<string, string | number | boolean | null>
+
 export const createDeal = async ({ dealCoupon, percentage }: CreateDealParams) => {
     try {
         const inserted = await db
@@ -238,7 +267,7 @@ export const getDealsWithTimeSpan = async () => {
             .leftJoin(productTable, eq(dealProducts.productId, productTable.id));
 
         const grouped = Object.values(
-            rows.reduce((acc: any, row) => {
+            rows.reduce((acc: GroupedDealsAcc, row) => {
                 if (!acc[row.id]) {
                     acc[row.id] = {
                         id: row.id,
@@ -249,14 +278,14 @@ export const getDealsWithTimeSpan = async () => {
                     };
                 }
 
-                if (row.timeSpanId && !acc[row.id].timeSpans.find((t: any) => t.id === row.timeSpanId)) {
+                if (row.timeSpanId && !acc[row.id].timeSpans.find((t: GroupedTimeSpan) => t.id === row.timeSpanId)) {
                     acc[row.id].timeSpans.push({
                         id: row.timeSpanId,
                         timeSpan: row.timeSpan,
                     });
                 }
 
-                if (row.productId && !acc[row.id].products.find((p: any) => p.id === row.productId)) {
+                if (row.productId && !acc[row.id].products.find((p: GroupedProduct) => p.id === row.productId)) {
                     acc[row.id].products.push({
                         id: row.productId,
                         productName: row.productName,
@@ -269,7 +298,7 @@ export const getDealsWithTimeSpan = async () => {
                 }
 
                 return acc;
-            }, {})
+            }, {} as GroupedDealsAcc)
         );
 
         return { success: true, data: grouped };
@@ -368,7 +397,7 @@ export const getProductsByCategory = async (
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-            variants: (r.variants as Record<string, any> | null) ?? {},
+            variants: (r.variants as VariantsType | null) ?? {},
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
         })),
@@ -454,7 +483,7 @@ export const getAllProducts = async (
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-            variants: (r.variants as Record<string, any> | null) ?? {},
+            variants: (r.variants as VariantsType | null) ?? {},
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
         })),
@@ -542,7 +571,7 @@ export const getAllTargetedProducts = async (
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-            variants: (r.variants as Record<string, any> | null) ?? {},
+            variants: (r.variants as VariantsType | null) ?? {},
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
         })),
@@ -633,7 +662,7 @@ export const getAllProductsType = async (
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-            variants: (r.variants as Record<string, any> | null) ?? {},
+            variants: (r.variants as VariantsType | null) ?? {},
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
         })),
@@ -689,7 +718,7 @@ export const getProductById = async (id: string): Promise<ProductWithDeal | null
         stock: r.stock ?? 0,
         isActive: r.isActive ?? true,
         relatedProducts: (r.relatedProducts as string[] | null) ?? [],
-        variants: (r.variants as Record<string, any> | null) ?? {},
+        variants: (r.variants as VariantsType | null) ?? {},
         brand: r.brand ?? null,
         dealCoupon: r.dealCoupon ?? null,
         dealPercentage: r.dealPercentage ?? null,

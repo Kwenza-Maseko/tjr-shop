@@ -3,9 +3,9 @@ import crypto from "crypto";
 export function generateSignature(data: Record<string, string>, passphrase?: string) {
     let pfOutput = "";
 
-    for (let keyValue in data) {
-        if (data[keyValue] !== "") {
-            pfOutput += `${keyValue}=${encodeURIComponent(data[keyValue].trim()).replace(/%20/g, "+")}&`;
+    for (let key in data) {
+        if (data[key] !== "") {
+            pfOutput += `${key}=${encodeURIComponent(data[key].trim()).replace(/%20/g, "+")}&`;
         }
     }
 

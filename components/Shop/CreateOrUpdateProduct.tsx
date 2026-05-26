@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
-    Form, FormField, FormItem, FormLabel, FormControl, FormMessage,
+    Form, FormField, FormItem, FormControl, FormMessage,
 } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '../ui/input';
@@ -21,10 +21,10 @@ import { IKImage, ImageKitProvider } from 'imagekitio-next';
 import MediaImages from './MediaImages';
 import ColorPicker from '../ColorPicker';
 import { createOrUpdateProduct } from '@/lib/store/product';
-import { useForm, UseFormReturn, DefaultValues, SubmitHandler, FieldValues, Path, Resolver } from "react-hook-form"
+import { useForm, } from "react-hook-form"
 import {
     ImageIcon, Loader2, Check, ChevronsUpDown,
-    Tag, Package, Ruler, Star, Zap, Users, Award, X
+    Tag, Package, Ruler, Star, Zap, Award, X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -103,8 +103,12 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
     const [brandOpen, setBrandOpen] = useState(false)
     const [customBrand, setCustomBrand] = useState('')
 
-    const form = useForm<z.infer<typeof productValidation>>({
-        resolver: zodResolver(productValidation) as any,
+    const form = useForm<
+        z.input<typeof productValidation>,
+        unknown,
+        z.output<typeof productValidation>
+    >({
+        resolver: zodResolver(productValidation),
         defaultValues: {
             id: productToEdit?.id ?? '',
             productName: productToEdit?.productName ?? '',
@@ -113,7 +117,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
             productTarget: productToEdit?.productTarget ?? '',
             productType: productToEdit?.productType ?? null,
             color: productToEdit?.color ?? null,
-            price: productToEdit?.price ?? ('' as any),   // empty string shows blank input
+            price: productToEdit?.price ?? 0,
             discountPrice: productToEdit?.discountPrice ?? null,
             stock: productToEdit?.stock ?? 0,
             sku: productToEdit?.sku ?? '',
@@ -129,7 +133,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
             brand: productToEdit?.brand ?? null,
         },
     })
-    const watchedTarget = form.watch('productTarget')   // e.g. "men"
+    const watchedTarget = form.watch('productTarget')
     const watchedCategory = form.watch('category')
     const availableCategories = watchedTarget
         ? (CATEGORIES_BY_TARGET[watchedTarget] ?? [])

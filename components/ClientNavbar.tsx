@@ -14,6 +14,11 @@ interface SidebarProps {
     productTypes: Record<string, string[]> | null
 }
 
+interface DesktopNavItem {
+    target: string
+    categories: string[]
+}
+
 interface GroupedTypes {
     [targetCategory: string]: string[]
 }
@@ -46,8 +51,8 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
     const [dropdown, setDropdown] = useState(false)
     const [menuDropdown, setMenuDropdown] = useState(false)
     const [level, setLevel] = useState(1)
-    const [selectedItem, setSelectedItem] = useState<any>(null)
-    const [selectedSub, setSelectedSub] = useState<any>(null)
+    const [selectedItem, setSelectedItem] = useState<DesktopNavItem | null>(null)
+    const [selectedSub, setSelectedSub] = useState<string | null>(null)
     const [isNotificationOpen, setIsNotificationOpen] = useState(false)
     const [hoveredTarget, setHoveredTarget] = useState<string | null>(null)
 

@@ -1,3 +1,4 @@
+
 'use client'
 
 import {
@@ -9,13 +10,12 @@ import {
   Truck,
   MapPin
 } from "lucide-react"
-
 import { Button } from '@/components/ui/button'
 import { useState } from "react"
 import { useAuth } from "./providers/AuthProvider"
 
 interface CheckoutProps {
-  cartItems: any[]
+  cartItems: Record<string, unknown>[]
   cartSubtotal: number
 }
 
@@ -27,6 +27,24 @@ interface DeliveryAddress {
   city: string
   province: string
   postalCode: string
+}
+
+interface PayfastData {
+  url: string
+  merchant_id: string
+  merchant_key: string
+  return_url: string
+  cancel_url: string
+  notify_url: string
+  name_first: string
+  name_last: string
+  email_address: string
+  m_payment_id: string
+  amount: string
+  item_name: string
+  signature: string
+
+  [keyValue: string]: string
 }
 
 const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
@@ -69,7 +87,7 @@ const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
     return Object.keys(errors).length === 0
   }
 
-  const redirectToPayfast = (data: any) => {
+  const redirectToPayfast = (data: PayfastData) => {
     const form = document.createElement("form")
     form.method = "POST"
     form.action = data.url

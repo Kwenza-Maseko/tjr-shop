@@ -19,15 +19,51 @@ const COLORS = [
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-interface Countdown { days: number; hours: number; minutes: number; seconds: number }
+interface Countdown {
+    days: number
+    hours: number
+    minutes: number
+    seconds: number
+}
 
-interface SliderState { offset: number }
+interface TimeSpan {
+    id: string
+    timeSpan: string | Date
+}
+
+interface DealProduct {
+    id: string
+    productName: string
+    imageUrl: string
+    price: string
+    discountPrice: string | null
+    rating: string | null
+    reviewCount: number | null
+}
+
+interface Deal {
+    id: string
+    dealCoupon: string
+    percentage: number
+    timeSpans: TimeSpan[]
+    products: DealProduct[]
+}
+
+type DealColor = typeof COLORS[0]
 
 const CARD_WIDTH = 160;
 const CARD_GAP = 12;
 const VISIBLE = 3;
 
-const DealSlider = ({ deal, color, countdown }: { deal: any; color: typeof COLORS[0]; countdown?: Countdown }) => {
+const DealSlider = ({
+    deal,
+    color,
+    countdown,
+}: {
+    deal: Deal
+    color: DealColor
+    countdown?: Countdown
+}) => {
     const [offset, setOffset] = useState(0);
     const trackRef = useRef<HTMLDivElement>(null);
     const touchStartX = useRef(0);
@@ -41,6 +77,7 @@ const DealSlider = ({ deal, color, countdown }: { deal: any; color: typeof COLOR
     const onTouchStart = (e: React.TouchEvent) => {
         touchStartX.current = e.touches[0].clientX;
     };
+
     const onTouchEnd = (e: React.TouchEvent) => {
         const dx = e.changedTouches[0].clientX - touchStartX.current;
         if (Math.abs(dx) > 40) slide(dx < 0 ? 1 : -1);
@@ -61,12 +98,14 @@ const DealSlider = ({ deal, color, countdown }: { deal: any; color: typeof COLOR
                     {countdown && (
                         <div className="flex items-center gap-1">
                             <span className="text-[10px] uppercase tracking-wider text-zinc-400 mr-1">Ends in</span>
-                            {[
-                                { val: countdown.days, lbl: 'd' },
-                                { val: countdown.hours, lbl: 'h' },
-                                { val: countdown.minutes, lbl: 'm' },
-                                { val: countdown.seconds, lbl: 's' },
-                            ].map(({ val, lbl }, idx) => (
+                            {(
+                                [
+                                    { val: countdown.days, lbl: 'd' },
+                                    { val: countdown.hours, lbl: 'h' },
+                                    { val: countdown.minutes, lbl: 'm' },
+                                    { val: countdown.seconds, lbl: 's' },
+                                ] as const
+                            ).map(({ val, lbl }, idx) => (
                                 <div key={lbl} className="flex items-center gap-1">
                                     <div className="flex items-baseline gap-0.5 bg-zinc-100 rounded px-1.5 py-0.5">
                                         <span className="text-xs font-medium tabular-nums text-zinc-900">{pad(val)}</span>
@@ -79,7 +118,6 @@ const DealSlider = ({ deal, color, countdown }: { deal: any; color: typeof COLOR
                     )}
                 </div>
 
-                {/* Nav arrows */}
                 <div className="flex gap-1.5">
                     <button
                         onClick={() => slide(-1)}
@@ -112,7 +150,7 @@ const DealSlider = ({ deal, color, countdown }: { deal: any; color: typeof COLOR
                         className="flex gap-3 transition-transform duration-300 ease-in-out"
                         style={{ transform: `translateX(-${offset * (CARD_WIDTH + CARD_GAP)}px)` }}
                     >
-                        {products.map((product: any) => {
+                        {products.map((product: DealProduct) => {
                             const original = parseFloat(product.price);
                             const dealP = original - (original * deal.percentage / 100);
 
@@ -120,9 +158,9 @@ const DealSlider = ({ deal, color, countdown }: { deal: any; color: typeof COLOR
                                 <Link
                                     key={product.id}
                                     href={`/product/${product.id}`}
-                                    className="flex-none w-46 border border-zinc-100 rounded-xl bg-white overflow-hidden"
+                                    className="flex-none w-40 border border-zinc-100 rounded-xl bg-white overflow-hidden"
                                 >
-                                    <div className="relative h-46 bg-zinc-50 overflow-hidden">
+                                    <div className="relative h-40 bg-zinc-50 overflow-hidden">
                                         {product.imageUrl && (
                                             <IKImage
                                                 path={product.imageUrl}
@@ -152,13 +190,12 @@ const DealSlider = ({ deal, color, countdown }: { deal: any; color: typeof COLOR
                                                 <span className="text-amber-400 text-xs">★</span>
                                                 <span className="text-[11px] text-zinc-400">
                                                     {parseFloat(product.rating).toFixed(1)}
-                                                    {product.reviewCount > 0 && ` (${product.reviewCount})`}
+                                                    {product.reviewCount != null && product.reviewCount > 0 && ` (${product.reviewCount})`}
                                                 </span>
                                             </div>
                                         )}
                                     </div>
                                 </Link>
-
                             );
                         })}
                     </div>
@@ -172,8 +209,9 @@ const DealSlider = ({ deal, color, countdown }: { deal: any; color: typeof COLOR
                         <button
                             key={i}
                             onClick={() => setOffset(i)}
-                            className={`h-1.5 rounded-full transition-all duration-200 ${i === offset ? 'w-4 bg-zinc-800' : 'w-1.5 bg-zinc-300'
-                                }`}
+                            className={`h-1.5 rounded-full transition-all duration-200 ${
+                                i === offset ? 'w-4 bg-zinc-800' : 'w-1.5 bg-zinc-300'
+                            }`}
                         />
                     ))}
                 </div>
@@ -186,16 +224,19 @@ const DealSlider = ({ deal, color, countdown }: { deal: any; color: typeof COLOR
 
 const DisplayDeals = () => {
     const { deals, loading } = useDeals();
-    const [timers, setTimers] = useState<{ [key: string]: Countdown }>({});
+    const [timers, setTimers] = useState<Record<string, Countdown>>({});
 
     useEffect(() => {
         const intervals: NodeJS.Timeout[] = [];
-        deals.forEach((deal: any) => {
-            const nextTime = deal.timeSpans?.find((t: any) =>
+
+        deals.forEach((deal: Deal) => {
+            const nextTime = deal.timeSpans?.find((t: TimeSpan) =>
                 new Date(t.timeSpan).getTime() > Date.now()
             );
             if (!nextTime) return;
+
             const target = new Date(nextTime.timeSpan).getTime();
+
             const update = () => {
                 const diff = target - Date.now();
                 if (diff <= 0) return;
@@ -209,9 +250,11 @@ const DisplayDeals = () => {
                     }
                 }));
             };
+
             update();
             intervals.push(setInterval(update, 1000));
         });
+
         return () => intervals.forEach(clearInterval);
     }, [deals]);
 
@@ -239,14 +282,14 @@ const DisplayDeals = () => {
     return (
         <div className="py-6 px-4 md:px-8">
             <div className="flex items-baseline gap-3 mb-6">
-                <h1 className="text-medium tracking-widest text-zinc-900">HOT DEALS</h1>
+                <h1 className="text-base tracking-widest text-zinc-900">HOT DEALS</h1>
                 <span className="text-xs text-zinc-400 uppercase tracking-wider">Limited time only</span>
             </div>
 
             {deals.length === 0 ? (
                 <p className="text-sm text-zinc-400">No exclusive deals available right now.</p>
             ) : (
-                deals.map((deal: any, i: number) => (
+                deals.map((deal: Deal, i: number) => (
                     <DealSlider
                         key={deal.id}
                         deal={deal}

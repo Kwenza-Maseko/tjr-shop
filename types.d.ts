@@ -69,7 +69,7 @@ export interface ProductParams {
   reviewCount: number
   isActive: boolean
   relatedProducts: string[] | null
-  variants: Record<string, string[]> | null 
+  variants: Record<string, unknown>
   brand: string | null
 }
 
@@ -100,8 +100,8 @@ export interface CartItem {
   imageUrl: string;
   quantity: number;
 
-  priceSnapshot: string;              // ✅ STRING
-  discountSnapshot?: string | null;   // ✅ STRING
+  priceSnapshot: string;              
+  discountSnapshot?: string | null;   
 
   selectedOptions?: any | null;
   isActive?: boolean;

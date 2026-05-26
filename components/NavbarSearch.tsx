@@ -3,17 +3,26 @@
 import { useState, useEffect, useRef } from 'react'
 import { Search, X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 import config from '@/lib/config'
 import { IKImage, ImageKitProvider } from "imagekitio-next"
 
+
+
+interface SearchProduct {
+    id: string
+    productName: string
+    imageUrl?: string | null
+    productTarget: string
+    category: string
+    price: string | number
+    discountPrice?: string | number | null
+}
+
 const { urlEndpoint, publicKey } = config.env.imagekit
-const toSlug = (str: string) =>
-    str?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') ?? 'all'
 
 export default function NavSearch() {
     const [query, setQuery] = useState('')
-    const [results, setResults] = useState<any[]>([])
+    const [results, setResults] = useState<SearchProduct[]>([])
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
     const [showInput, setShowInput] = useState(false)

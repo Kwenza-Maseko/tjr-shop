@@ -13,12 +13,10 @@ const { env: { imagekit: { publicKey, urlEndpoint } } } = config;
 
 const authenticator = async () => {
     try {
-
         const response = await fetch(`${config.env.apiEndpoint}/api/auth/imagekit`);
 
         if (!response.ok) {
             const errorText = await response.text();
-
             throw new Error(`Request failed with status ${response.status} : ${errorText}`)
         }
 
@@ -27,17 +25,30 @@ const authenticator = async () => {
 
         return { token, expire, signature };
 
-    } catch (error: any) {
-        throw new Error(`Authenticate request failed: ${error.message}`)
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        throw new Error(`Authenticate request failed: ${message}`)
     }
 }
+
+interface IKUploadError {
+    message: string
+}
+
+interface IKUploadResponse {
+    filePath: string
+    url: string
+    fileId: string
+    name: string
+}
+
 type ImageUploadProps = {
-    type: 'image',
-    accept: string,
-    folder: string,
+    type: 'image'
+    accept: string
+    folder: string
     placeholder: string
-    onFileChange: (filePath: string) => void;
-};
+    onFileChange: (filePath: string) => void
+}
 
 const ImageUpload = ({
     type,
@@ -46,30 +57,27 @@ const ImageUpload = ({
     placeholder,
     onFileChange
 }: ImageUploadProps) => {
-    const ikUploadRef = useRef(null);
-    const [file, setFile] = useState<{ filePath: string } | null>(null);
+    const ikUploadRef = useRef<HTMLInputElement>(null);
     const [progress, setProgress] = useState(0);
 
-
-
-    const onError = (error: any) => {
-        console.log(error)
+    const onError = (error: IKUploadError) => {
+        toast(error.message)
     };
-    const onSuccess = (res: any) => {
-        setFile(res);
+
+    const onSuccess = (res: IKUploadResponse) => {
         onFileChange(res.filePath);
     };
 
     const onValidate = (file: File) => {
         if (type === 'image') {
-            if (file.size > 20 * 1024 * 1024) {
-                toast('File is too large upload a file that is less then 20 MB')
-
+            if (file.size > 5 * 1024 * 1024) {
+                toast('File is too large — upload a file smaller than 5 MB')
                 return false;
             }
         }
         return true;
     };
+
     return (
         <ImageKitProvider
             publicKey={publicKey}
@@ -92,29 +100,28 @@ const ImageUpload = ({
                 accept={accept}
             />
 
-            <Button className="flex gap-2 items-center bg-green-500 hover:bg-green-700 text-sm cursor-pointer rounded"
+            <Button
+                className="flex gap-2 items-center bg-green-500 hover:bg-green-700 text-sm cursor-pointer rounded"
                 onClick={(e) => {
                     e.preventDefault();
-                    if (ikUploadRef.current) {
-                        //@ts-expect-error
-                        ikUploadRef.current?.click();
-                    }
+                    ikUploadRef.current?.click();
                 }}
             >
-                <LucideGalleryThumbnails size={18}
-                />
+                <LucideGalleryThumbnails size={18} />
                 <p>{placeholder}</p>
             </Button>
 
             {progress > 0 && progress !== 100 && (
                 <div className="w-full">
                     <div className="w-full rounded-full bg-green-200 mt-2">
-                        <div className="bg-green-400 rounded-full text-xs p-1 text-white px-4" style={{ width: `${progress}` }}>
+                        <div
+                            className="bg-green-400 rounded-full text-xs p-1 text-white px-4"
+                            style={{ width: `${progress}%` }}
+                        >
                             {progress}%
                         </div>
                     </div>
-
-                    <p className="mt-1 capitalize">{type} uploading....</p>
+                    <p className="mt-1 capitalize">{type} uploading...</p>
                 </div>
             )}
         </ImageKitProvider>
