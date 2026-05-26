@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import config from "@/lib/config"
 import { IKImage, ImageKitProvider } from 'imagekitio-next';
+import type { Deal, DealProduct, TimeSpan, Countdown } from '@/types';
 
 const { urlEndpoint, publicKey } = config.env.imagekit
 
@@ -18,36 +19,6 @@ const COLORS = [
 ];
 
 const pad = (n: number) => String(n).padStart(2, '0');
-
-interface Countdown {
-    days: number
-    hours: number
-    minutes: number
-    seconds: number
-}
-
-interface TimeSpan {
-    id: string
-    timeSpan: string | Date
-}
-
-interface DealProduct {
-    id: string
-    productName: string
-    imageUrl: string
-    price: string
-    discountPrice: string | null
-    rating: string | null
-    reviewCount: number | null
-}
-
-interface Deal {
-    id: string
-    dealCoupon: string
-    percentage: number
-    timeSpans: TimeSpan[]
-    products: DealProduct[]
-}
 
 type DealColor = typeof COLORS[0]
 
@@ -85,7 +56,6 @@ const DealSlider = ({
 
     return (
         <div className="mb-10">
-            {/* Deal header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3 flex-wrap">
                     <span
@@ -138,7 +108,6 @@ const DealSlider = ({
                 </div>
             </div>
 
-            {/* Slider */}
             <div
                 className="overflow-hidden px-4 md:px-0"
                 onTouchStart={onTouchStart}
@@ -151,6 +120,7 @@ const DealSlider = ({
                         style={{ transform: `translateX(-${offset * (CARD_WIDTH + CARD_GAP)}px)` }}
                     >
                         {products.map((product: DealProduct) => {
+                            if (!product.price) return null;
                             const original = parseFloat(product.price);
                             const dealP = original - (original * deal.percentage / 100);
 
@@ -164,7 +134,7 @@ const DealSlider = ({
                                         {product.imageUrl && (
                                             <IKImage
                                                 path={product.imageUrl}
-                                                alt={product.productName}
+                                                alt={product.productName ?? product.id}
                                                 fill
                                                 className="object-cover transition-transform duration-300"
                                             />
@@ -202,7 +172,6 @@ const DealSlider = ({
                 </ImageKitProvider>
             </div>
 
-            {/* Dot indicators */}
             {maxOffset > 0 && (
                 <div className="flex justify-center gap-1.5 mt-3">
                     {Array.from({ length: maxOffset + 1 }).map((_, i) => (
@@ -231,9 +200,9 @@ const DisplayDeals = () => {
 
         deals.forEach((deal: Deal) => {
             const nextTime = deal.timeSpans?.find((t: TimeSpan) =>
-                new Date(t.timeSpan).getTime() > Date.now()
+                t.timeSpan !== null && new Date(t.timeSpan).getTime() > Date.now()
             );
-            if (!nextTime) return;
+            if (!nextTime || !nextTime.timeSpan) return;
 
             const target = new Date(nextTime.timeSpan).getTime();
 

@@ -135,3 +135,33 @@ declare module "next-auth/jwt" {
 }
 
 export type PublicUser = Omit<User, "password" | "passwordResetToken" | "passwordResetExpires">
+
+export interface TimeSpan {
+    id: string
+    timeSpan: string | Date | null
+}
+
+export interface DealProduct {
+    id: string
+    productName: string | null
+    imageUrl: string | null
+    price: string | null
+    discountPrice: string | null
+    rating: string | null
+    reviewCount: number | null
+}
+
+export interface Deal {
+    id: string
+    dealCoupon: string
+    percentage: number
+    timeSpans: TimeSpan[]
+    products: DealProduct[]
+}
+
+export interface Countdown {
+    days: number
+    hours: number
+    minutes: number
+    seconds: number
+}
