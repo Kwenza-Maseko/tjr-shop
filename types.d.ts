@@ -1,17 +1,6 @@
 import { string } from "zod";
 
-export interface User {
-  id: string;
-  fullName: string;
-  email: string;
-  password: string;
-  role: "USERS" | "ADMIN" | null; // ✅ matches DB enum
-  phoneNumber: string | null;
-  createdAt: Date | null;         // ✅ timestamp with timezone
-  lastLogin: Date | null;         // ✅ stores date only (still valid as Date in TS)
-  passwordResetToken: string | null;
-  passwordResetExpires: Date | null;
-}
+
 
 export interface AdminParams {
   id: string;
@@ -113,6 +102,18 @@ export interface CartItem {
 
 import { DefaultSession } from "next-auth"
 
+export interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  password: string;
+  role: "USERS" | "ADMIN" | null; 
+  phoneNumber: string | null;
+  createdAt: Date | null;         
+  lastLogin: Date | null;        
+  passwordResetToken: string | null;
+  passwordResetExpires: Date | null;
+}
 declare module "next-auth" {
   interface Session {
     user: {

@@ -6,11 +6,11 @@ import {
     TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
 import { Input } from '@/components/ui/input'
-import { User } from '@/types'
+import { PublicUser, User } from '@/types'
 import { getUsers } from '@/lib/auth/auth'
 import {
     ChevronLeft, ChevronRight, Loader2,
-    Users, UserCheck, CalendarDays, Phone, Search
+    Users, CalendarDays, Phone, Search
 } from 'lucide-react'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -44,9 +44,9 @@ function fmtDate(d: string | Date | null) {
 function timeAgo(d: string | Date | null) {
     if (!d) return 'Never'
     const diff = Math.floor((Date.now() - new Date(d).getTime()) / 1000)
-    if (diff < 60)     return 'Just now'
-    if (diff < 3600)   return `${Math.floor(diff / 60)}m ago`
-    if (diff < 86400)  return `${Math.floor(diff / 3600)}h ago`
+    if (diff < 60) return 'Just now'
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
     if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`
     return fmtDate(d)
 }
@@ -76,7 +76,7 @@ function Pagination({ currentPage, totalPages, onPageChange, totalItems, pageSiz
     totalItems: number; pageSize: number
 }) {
     const start = (currentPage - 1) * pageSize + 1
-    const end   = Math.min(currentPage * pageSize, totalItems)
+    const end = Math.min(currentPage * pageSize, totalItems)
 
     const pages: (number | '…')[] = []
     for (let i = 1; i <= totalPages; i++) {
@@ -131,9 +131,9 @@ const PAGE_SIZE = 10
 
 const Customers = () => {
     const [loading, setLoading] = useState(false)
-    const [users, setUsers]     = useState<User[]>([])
-    const [search, setSearch]   = useState('')
-    const [page, setPage]       = useState(1)
+    const [users, setUsers] = useState<PublicUser[]>([])
+    const [search, setSearch] = useState('')
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
         const fetch_ = async () => {
@@ -169,7 +169,7 @@ const Customers = () => {
     }, [users, search])
 
     const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-    const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+    const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
     const handleSearch = (v: string) => { setSearch(v); setPage(1) }
 
