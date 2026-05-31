@@ -1,16 +1,14 @@
 'use client'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { Session } from 'next-auth'
-import { Bell, LogOut, ShoppingCart, ChevronRight } from 'lucide-react'
-import { signOut } from 'next-auth/react'
+import { Bell, LogOut, ShoppingCart, ChevronRight, User2 } from 'lucide-react'
+import { signOut, useSession } from 'next-auth/react'
 import Notifications from './Notifications'
 import Image from 'next/image'
 import NavSearch from './NavbarSearch'
 import { useCart } from './providers/CartProvider'
 
 interface SidebarProps {
-    session: Session | null
     productTypes: Record<string, string[]> | null
 }
 
@@ -42,8 +40,10 @@ const DESKTOP_NAV = [
     },
 ]
 
-const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
+const ClientNavbar = ({ productTypes }: SidebarProps) => {
     const typeMap: GroupedTypes = productTypes ?? {}
+
+    const { data: session } = useSession();
 
     const getInitials = (name: string) =>
         name.charAt(0).toUpperCase()
@@ -88,39 +88,30 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
                             onMouseEnter={() => setHoveredTarget(target)}
                             onMouseLeave={() => setHoveredTarget(null)}
                         >
-                            {/* Top level label */}
                             <Link
                                 href={`/store/${target}/all`}
                                 className="px-5 py-5 text-sm font-medium capitalize text-zinc-500 hover:text-black transition-colors md:block hidden"
                             >
                                 {target}
                             </Link>
-
-                            {/* Mega dropdown */}
                             {hoveredTarget === target && (
                                 <div className="absolute top-full left-0 z-50 w-[600px]">
                                     <div className="bg-white border border-zinc-200 shadow-lg p-5 grid grid-cols-3 gap-6">
                                         {categories.map(cat => {
-                                            // DB key format: "men__Clothing"
                                             const key = `${target}__${cat}`
                                             const items = typeMap[key] ?? []
 
                                             return (
                                                 <div key={cat}>
-                                                    {/* Category heading */}
                                                     <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 mb-2">
                                                         {cat}
                                                     </p>
-
-                                                    {/* All link */}
                                                     <Link
                                                         href={`/store/${target}/${toSlug(cat)}/all`}
                                                         className="block text-sm text-zinc-800 hover:text-black font-medium py-1 hover:underline"
                                                     >
                                                         All {cat}
                                                     </Link>
-
-                                                    {/* Product types from DB */}
                                                     {items.length > 0 ? (
                                                         items.map(type => (
                                                             <Link
@@ -144,86 +135,115 @@ const ClientNavbar = ({ session, productTypes }: SidebarProps) => {
                     ))}
                 </ul>
 
-                {/* ── Right icons ── */}
                 <div className="flex gap-4 items-center">
                     <NavSearch />
-                    {session?.user && (
-                        <div className="flex items-center gap-4 relative">
-                            <Link href="/cart" className="relative inline-flex">
-                                <ShoppingCart
-                                    className="w-5 h-5 text-zinc-600"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    aria-hidden="true"
-                                />
+                    <div className="flex items-center gap-4 relative">
+                        <Bell
+                            className="w-5 h-5 text-zinc-600 cursor-pointer"
+                            onClick={() => setIsNotificationOpen((p) => !p)}
+                        />
+                        {session?.user ? (
+                            <>
+                                <Link href="/cart" className="relative inline-flex">
+                                    <ShoppingCart
+                                        className="w-5 h-5 text-zinc-600"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        aria-hidden="true"
+                                    />
 
-                                {cartCount > 0 && (
-                                    <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[10px] font-medium min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center leading-none">
-                                        {cartCount > 99 ? "99+" : cartCount}
-                                    </span>
-                                )}
-                            </Link>
-                            <Bell
-                                className="w-5 h-5 text-zinc-600 cursor-pointer"
-                                onClick={() => setIsNotificationOpen(p => !p)}
-                            />
-                            <div
-                                className="w-[25px] h-[25px] rounded-full flex items-center justify-center bg-gray-300 border border-gray-500 text-xs font-bold cursor-pointer"
-                                onClick={() => setDropdown(p => !p)}
-                            >
-                                {getInitials(session.user.name || '')}
-                            </div>
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[10px] font-medium min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center leading-none">
+                                            {cartCount > 99 ? "99+" : cartCount}
+                                        </span>
+                                    )}
+                                </Link>
 
-                            {dropdown && (
                                 <div
-                                    className="fixed bg-black/70 right-0 top-0 bottom-0 h-screen flex justify-end left-0"
-                                    onClick={() => setDropdown(false)}
+                                    className="w-[25px] h-[25px] rounded-full flex items-center justify-center bg-gray-300 border border-gray-500 text-xs font-bold cursor-pointer"
+                                    onClick={() => setDropdown((p) => !p)}
                                 >
+                                    {getInitials(session.user.name || "")}
+                                </div>
+
+                                {dropdown && (
                                     <div
-                                        className="h-full w-full md:w-96 bg-white p-4"
-                                        onClick={(e) => e.stopPropagation()}
+                                        className="fixed inset-0 bg-black/70 flex justify-end z-50"
+                                        onClick={() => setDropdown(false)}
                                     >
-                                        <div className='mb-3 text-end text-muted-foreground cursor-pointer'
-                                        onClick={() => setDropdown(false)}>
-                                            x
-                                        </div>
-                                        <div className="p-3 text-gray-600 rounded bg-zinc-100">
-                                            <p>{session.user.name}</p>
-                                            <p className='text-xs text-muted-foreground truncate'>{session.user.email}</p>
-                                        </div>
-
-                                        <div className="flex flex-col gap-4 mt-4">
-                                            <Link
-                                                href={`/account/track`}
-                                                onClick={() => setDropdown(false)}
-                                                className="px-3"
-                                            >
-                                                Track Order
-                                            </Link>
-
-                                            <Link
-                                                href={`/account/manage-account`}
-                                                onClick={() => setDropdown(false)}
-                                                className="px-3"
-                                            >
-                                                Manage Account
-                                            </Link>
-                                        </div>
-
                                         <div
-                                            className="border-t p-3 flex gap-2 mt-4 text-red-600 cursor-pointer"
-                                            onClick={() => signOut()}
+                                            className="h-full w-full md:w-96 bg-white p-4"
+                                            onClick={(e) => e.stopPropagation()}
                                         >
-                                            <LogOut className="w-4 h-4" />
-                                            <p>Logout</p>
+                                            <div
+                                                className="mb-3 text-end text-muted-foreground cursor-pointer"
+                                                onClick={() => setDropdown(false)}
+                                            >
+                                                x
+                                            </div>
+
+                                            <div className="p-3 text-gray-600 rounded bg-zinc-100">
+                                                <p>{session.user.name}</p>
+                                                <p className="text-xs text-muted-foreground truncate">
+                                                    {session.user.email}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex flex-col gap-4 mt-4">
+                                                <Link
+                                                    href="/account/track"
+                                                    onClick={() => setDropdown(false)}
+                                                    className="px-3"
+                                                >
+                                                    Track Order
+                                                </Link>
+
+                                                <Link
+                                                    href="/account/manage-account"
+                                                    onClick={() => setDropdown(false)}
+                                                    className="px-3"
+                                                >
+                                                    Manage Account
+                                                </Link>
+                                            </div>
+
+                                            <div
+                                                className="border-t p-3 flex gap-2 mt-4 text-red-600 cursor-pointer"
+                                                onClick={() => signOut()}
+                                            >
+                                                <LogOut className="w-4 h-4" />
+                                                <p>Logout</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/cart" className="relative inline-flex">
+                                    <ShoppingCart
+                                        className="w-5 h-5 text-zinc-600"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        aria-hidden="true"
+                                    />
+                                </Link>
 
-                    {/* Mobile hamburger */}
+                                <Link
+                                    href={"/sign-in"}
+                                    className="w-[25px] h-[25px] rounded-full flex items-center justify-center bg-gray-300 border border-gray-500 text-xs font-bold cursor-pointer"
+                                >
+                                    <User2
+                                        className="w-3 h-3 text-zinc-600"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        aria-hidden="true"
+                                    />
+                                </Link>
+                            </>
+                        )}
+                    </div>
+
                     <div
                         className="space-y-1.5 w-5.5 cursor-pointer md:hidden"
                         onClick={() => setMenuDropdown(p => !p)}

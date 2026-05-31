@@ -1,8 +1,7 @@
-// app/api/products/route.ts
+
 import { db } from '@/database/drizzle'
 import { productTable } from '@/database/schema'
 import { ilike, or, count, desc } from 'drizzle-orm'
-import { sql } from 'drizzle-orm'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)

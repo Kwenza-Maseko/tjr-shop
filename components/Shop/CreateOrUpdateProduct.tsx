@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import {
     Form, FormField, FormItem, FormControl, FormMessage,
@@ -32,6 +31,8 @@ import {
     CATEGORIES_BY_TARGET,
     PRODUCT_TYPES_BY_CATEGORY,
 } from '@/lib/constants/nav'
+import SizeManager from './SizeManager'
+import { Shirt } from 'lucide-react'
 
 type CreateOrUpdateProductParams = {
     productToEdit?: ProductParams
@@ -218,9 +219,7 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
         setLoading(false)
 
         if (result.success && result.data) {
-            toast.success(`Product ${result.action} successfully`)
 
-            // ✅ Normalize DB response (numeric columns come back as strings from Drizzle)
             const normalized: ProductParams = {
                 id: result.data.id,
                 productName: result.data.productName,
@@ -413,21 +412,6 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                                     <Input className={`${inputClass} pl-7`} {...field}
                                                         value={field.value === null || field.value === undefined ? '' : String(field.value)} type="number" step="0.01" placeholder="0.00" />
                                                 </div>
-                                            </FormControl>
-                                        </FieldRow>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="stock"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FieldRow label="Stock">
-                                            <FormControl>
-                                                <Input className={inputClass} {...field}
-                                                    value={field.value === null || field.value === undefined ? '' : String(field.value)} type="number" placeholder="0" />
                                             </FormControl>
                                         </FieldRow>
                                         <FormMessage />
@@ -637,6 +621,12 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                         </div>
                     </Section>
 
+
+                    {mode === 'update' && productToEdit?.id && (
+                        <Section icon={<Shirt className="w-4 h-4" />} title="Sizes & Stock">
+                            <SizeManager productId={productToEdit.id} />
+                        </Section>
+                    )}
                     {/* ── Status + Target ───────────────────────────────── */}
                     <Section icon={<Zap className="w-4 h-4" />} title="Status & Visibility">
                         <FormField

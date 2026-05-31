@@ -10,15 +10,15 @@ export const CATEGORIES_BY_TARGET: Record<string, string[]> = {
 
 export const PRODUCT_TYPES_BY_CATEGORY: Record<string, string[]> = {
   Clothing: [
-    'All Clothing', 'Tops and T-Shirts', 'Hoodies and Sweatshirts',
+    'All Clothing', 'Tops and T Shirts', 'Hoodies and Sweatshirts',
     'Shorts', 'Trousers', 'Leggings', 'Matching Sets',
     'Tracksuits', 'Jackets', 'Sports Bras', 'Accessories',
   ],
   Shoes: ['All Shoes', 'Sneakers', 'Trainers', 'Sandals', 'Boots', 'Heels', 'Flats', 'Formal Shoes'],
   Brand: ['Nike', 'Adidas', 'Lacoste', 'Puma', 'New Balance'],
   'Kids By Age': [
-    'Teens (13 - 17 years)', 'Older Kids (7 - 12 years)',
-    'Younger Kids (3 - 7 years)', 'Baby & Toddler (0 - 3 years)',
+    'Teens (13 to 17 years)', 'Older Kids (7 to 12 years)',
+    'Younger Kids (3 to 7 years)', 'Baby & Toddler (0 to 3 years)',
   ],
   Running:          ['All Running', 'Shoes', 'Clothing', 'Accessories'],
   Football:         ['All Football', 'Shoes', 'Clothing', 'Accessories'],

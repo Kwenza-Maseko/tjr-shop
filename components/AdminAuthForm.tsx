@@ -52,6 +52,8 @@ const AdminAuthForm = <T extends FieldValues>({
         defaultValues: defaultValues as DefaultValues<T>,
     });
 
+    const passwordValue = form.watch("password" as Path<T>) as string ?? ""
+
     const handleSubmit: SubmitHandler<T> = async (data) => {
         setLoading(true);
         const result = await onSubmit(data);
@@ -93,7 +95,7 @@ const AdminAuthForm = <T extends FieldValues>({
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex justify-between w-full">
-                                        <FormLabel className='capitalize'>{FIELD_NAMES[field.name as keyof typeof FIELD_NAMES]}</FormLabel>
+                                        <FormLabel className='text-[11px] text-zinc-500 uppercase tracking-wider'>{FIELD_NAMES[field.name as keyof typeof FIELD_NAMES]}</FormLabel>
                                         {isSignedIn && field.name === "password" && (
                                             <Link href={"/forgot-password"} className="text-blue-500 cursor-pointer">Forgot password?</Link>
                                         )}
@@ -104,9 +106,34 @@ const AdminAuthForm = <T extends FieldValues>({
                                             required
                                             {...field}
                                             type={FIELD_TYPE[field.name as keyof typeof FIELD_TYPE]}
-                                            className='bg-[#edededed]  py-5'
+                                            className='w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg outline-none focus:border-zinc-400 bg-white transition-colors'
                                         />
                                     </FormControl>
+
+                                       {!isSignedIn && field.name === "password" && passwordValue.length > 0 && (
+                                        <div className="space-y-1 pt-1">
+                                            <div className="flex gap-1">
+                                                {[1, 2, 3, 4].map(i => (
+                                                    <div
+                                                        key={i}
+                                                        className={`h-1 flex-1 rounded-full transition-colors ${passwordValue.length >= i * 3
+                                                            ? passwordValue.length >= 10
+                                                                ? 'bg-green-400'
+                                                                : 'bg-amber-400'
+                                                            : 'bg-zinc-200'
+                                                            }`}
+                                                    />
+                                                ))}
+                                            </div>
+                                            <p className="text-[11px] text-zinc-400">
+                                                {passwordValue.length < 6
+                                                    ? 'Too short'
+                                                    : passwordValue.length < 10
+                                                        ? 'Could be stronger'
+                                                        : 'Strong password'}
+                                            </p>
+                                        </div>
+                                    )}
                                     <FormMessage />
                                 </FormItem>
                             )}

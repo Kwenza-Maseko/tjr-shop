@@ -3,7 +3,7 @@
 import { useDeals } from './providers/DealContext';
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import config from "@/lib/config"
 import { IKImage, ImageKitProvider } from 'imagekitio-next';
 import type { Deal, DealProduct, TimeSpan, Countdown } from '@/types';
@@ -157,7 +157,7 @@ const DealSlider = ({
                                         </div>
                                         {product.rating && (
                                             <div className="flex items-center gap-1 mt-1">
-                                                <span className="text-amber-400 text-xs">★</span>
+                                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                                                 <span className="text-[11px] text-zinc-400">
                                                     {parseFloat(product.rating).toFixed(1)}
                                                     {product.reviewCount != null && product.reviewCount > 0 && ` (${product.reviewCount})`}

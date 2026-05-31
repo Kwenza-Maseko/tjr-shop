@@ -99,8 +99,6 @@ export const announcements = pgTable("announcements", {
     }).defaultNow(),
 });
 
-
-
 export const cartTable = pgTable("cart", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
     userId: uuid("user_id")
@@ -132,7 +130,6 @@ export const deals = pgTable("deals", {
     percentage: integer("percentage").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
-
 
 export const dealProducts = pgTable("deal_products", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -185,6 +182,19 @@ export const productTable = pgTable("products", {
         withTimezone: true,
     }).defaultNow(),
 });
+
+export const productSizes = pgTable("product_sizes", {
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    productId: uuid("product_id")
+        .notNull()
+        .references(() => productTable.id, { onDelete: "cascade" }),
+    size: varchar("size", { length: 20 }).notNull(),
+    quantity: integer("quantity").notNull().default(0),
+    isAvailable: boolean("is_available").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+})
+
 
 export const orderStatusEnum = pgEnum("order_status", [
   "PENDING",

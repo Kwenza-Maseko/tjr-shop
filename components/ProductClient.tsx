@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { createOrUpdateCart } from "@/lib/store/cart";
 import { getProductById, ProductWithDeal } from "@/lib/store/deals";
 import { resolveEffectivePrice } from "@/lib/price";
-import { Tag } from "lucide-react";
+import { Star, Tag } from "lucide-react";
 
 const { urlEndpoint, publicKey } = config.env.imagekit;
 
@@ -21,7 +21,12 @@ const ProductClient = ({ userId }: { userId: string }) => {
     const [product, setProduct] = useState<ProductWithDeal | null>(null)
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
+    const [productQty, setProductQty] = useState<number>(0);
 
+
+    const handleQtyDisplay = (qyt: number) => {
+        setProductQty(qyt)
+    };
 
     useEffect(() => {
         if (selectedProduct?.id === id) {
@@ -92,6 +97,15 @@ const ProductClient = ({ userId }: { userId: string }) => {
                     <div className="block lg:hidden">
                         <h1 className="text-xl font-semibold">{product.productName}</h1>
                         <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{product.productType}</p>
+                        {product.rating && (
+                            <div className="flex items-center gap-1 mt-1">
+                                <span className="text-amber-400 text-xs">★</span>
+                                <span className="text-[11px] text-zinc-400">
+                                    {product.rating.toFixed(1)}
+                                    {product.reviewCount != null && product.reviewCount > 0 && ` (${product.reviewCount})`}
+                                </span>
+                            </div>
+                        )}
                     </div>
                     <div className="w-full h-full md:w-[350px] md:h-[350px]">
                         <IKImage
@@ -110,6 +124,16 @@ const ProductClient = ({ userId }: { userId: string }) => {
                                 <div className="lg:block hidden">
                                     <h1 className="text-xl font-semibold">{product.productName}</h1>
                                     <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{product.productType}</p>
+
+                                    {product.rating && (
+                                        <div className="flex items-center gap-1 mt-1">
+                                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                            <span className="text-[11px] text-zinc-400">
+                                                {product.rating.toFixed(1)}
+                                                {product.reviewCount != null && product.reviewCount > 0 && ` (${product.reviewCount})`}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="flex gap-4 items-end">
@@ -135,12 +159,15 @@ const ProductClient = ({ userId }: { userId: string }) => {
                                     </p>
                                 )}
 
-                                <p
-                                    className={`${product.isActive ? "text-green-700 bg-green-300" : "text-red-900 bg-red-200"
-                                        } font-semibold py-1 px-2 w-fit mt-3 text-[11px] rounded-full`}
-                                >
-                                    {product.isActive ? "On Stock" : "Out Of Stock"}
-                                </p>
+                                <div className="flex gap-3 items-center uppercase">
+                                    <p
+                                        className={`${product.isActive ? "text-green-700 bg-green-100 border-green-300 border" : "text-red-700 bg-red-100 border-red-300 border line-through"
+                                            } font-semibold py-1 px-2 w-fit mt-3 text-[11px] rounded-full`}
+                                    >
+                                        {product.isActive ? "On Stock" : "Out Of Stock"}
+                                    </p>
+                                </div>
+
                             </div>
 
                             <div className="w-full h-[1px] bg-gray-300 " />
@@ -188,23 +215,45 @@ const ProductClient = ({ userId }: { userId: string }) => {
 
                             <div className="space-y-2">
                                 <p className="font-semibold">Size</p>
-                                <div className="flex gap-3">
-                                    {["XS", "S", "M", "L", "XL"].map((size) => (
-                                        <Button
-                                            key={size}
-                                            onClick={() => setSelectedSize(size)}
-                                            className={`w-[40px] h-[40px] p-3 rounded border font-semibold ${selectedSize === size
-                                                ? "bg-black text-white"
-                                                : "bg-white text-black border-gray-300"
-                                                }`}
-                                        >
-                                            {size}
-                                        </Button>
-                                    ))}
-                                </div>
+
+                                {product?.sizes && product.sizes.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {product.sizes.map((s) => (
+                                            <div
+                                                key={s.id}>
+                                                <button
+                                                    disabled={!s.isAvailable}
+                                                    onClick={() => (
+                                                        setSelectedSize(s.size),
+                                                        handleQtyDisplay(s.quantity)
+                                                    )}
+                                                    className={`
+           px-4 py-2 text-sm font-medium rounded-xl border
+          ${s.isAvailable
+                                                            ? selectedSize === s.size
+                                                                ? "bg-black text-white border-black"
+                                                                : "bg-white text-zinc-700 border-zinc-200 hover:border-black hover:bg-zinc-50"
+                                                            : "bg-zinc-50 text-zinc-300 border-zinc-100 line-through cursor-not-allowed"
+                                                        }
+        `}
+                                                >
+                                                    {s.size}
+                                                </button>
+
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+
+                                {productQty != 0 && (
+                                    <div className="p-2 w-full bg-zinc-100 border-l-2 border-red-400">
+                                        <p className="text-[11px] text-red-500 mt-1">{productQty} Units Left</p>
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="space-y-1 w-full">
+                            <div className="space-y-1 w-full mt-8">
                                 <Button
                                     className="w-full py-6"
                                     disabled={!selectedColor || !selectedSize}

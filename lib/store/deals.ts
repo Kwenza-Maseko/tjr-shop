@@ -1,15 +1,20 @@
 'use server';
 
 import { db } from "@/database/drizzle";
-import { deals, dealProducts, productTable, dealTimeSpan } from "@/database/schema";
+import { deals, dealProducts, productTable, dealTimeSpan, productSizes } from "@/database/schema";
 import { DealTimeSpan, ProductParams } from "@/types";
 import { and, eq, gte, ilike, lte, count } from "drizzle-orm"
 
 export type ProductWithDeal = ProductParams & {
     dealCoupon?: string | null
     dealPercentage?: number | null
+    sizes?: {
+        id: string
+        size: string
+        quantity: number
+        isAvailable: boolean
+    }[]
 }
-
 interface CreateDealParams {
     dealCoupon: string;
     percentage: number;
@@ -671,39 +676,45 @@ export const getAllProductsType = async (
 }
 
 export const getProductById = async (id: string): Promise<ProductWithDeal | null> => {
-    const rows = await db
-        .select({
-            id: productTable.id,
-            productName: productTable.productName,
-            imageUrl: productTable.imageUrl,
-            description: productTable.description,
-            productTarget: productTable.productTarget,
-            productType: productTable.productType,
-            color: productTable.color,
-            price: productTable.price,
-            discountPrice: productTable.discountPrice,
-            stock: productTable.stock,
-            sku: productTable.sku,
-            category: productTable.category,
-            tags: productTable.tags,
-            weight: productTable.weight,
-            dimensions: productTable.dimensions,
-            rating: productTable.rating,
-            reviewCount: productTable.reviewCount,
-            isActive: productTable.isActive,
-            relatedProducts: productTable.relatedProducts,
-            variants: productTable.variants,
-            brand: productTable.brand,
-            createdAt: productTable.createdAt,
-            // Deal columns
-            dealCoupon: deals.dealCoupon,
-            dealPercentage: deals.percentage,
-        })
-        .from(productTable)
-        .leftJoin(dealProducts, eq(dealProducts.productId, productTable.id))
-        .leftJoin(deals, eq(deals.id, dealProducts.dealId))
-        .where(eq(productTable.id, id))
-        .limit(1)
+    const [rows, sizes] = await Promise.all([
+        db
+            .select({
+                id: productTable.id,
+                productName: productTable.productName,
+                imageUrl: productTable.imageUrl,
+                description: productTable.description,
+                productTarget: productTable.productTarget,
+                productType: productTable.productType,
+                color: productTable.color,
+                price: productTable.price,
+                discountPrice: productTable.discountPrice,
+                stock: productTable.stock,
+                sku: productTable.sku,
+                category: productTable.category,
+                tags: productTable.tags,
+                weight: productTable.weight,
+                dimensions: productTable.dimensions,
+                rating: productTable.rating,
+                reviewCount: productTable.reviewCount,
+                isActive: productTable.isActive,
+                relatedProducts: productTable.relatedProducts,
+                variants: productTable.variants,
+                brand: productTable.brand,
+                createdAt: productTable.createdAt,
+                dealCoupon: deals.dealCoupon,
+                dealPercentage: deals.percentage,
+            })
+            .from(productTable)
+            .leftJoin(dealProducts, eq(dealProducts.productId, productTable.id))
+            .leftJoin(deals, eq(deals.id, dealProducts.dealId))
+            .where(eq(productTable.id, id))
+            .limit(1),
+
+        db
+            .select()
+            .from(productSizes)
+            .where(eq(productSizes.productId, id)),
+    ])
 
     if (!rows.length) return null
 
@@ -722,5 +733,11 @@ export const getProductById = async (id: string): Promise<ProductWithDeal | null
         brand: r.brand ?? null,
         dealCoupon: r.dealCoupon ?? null,
         dealPercentage: r.dealPercentage ?? null,
+        sizes: sizes.map(s => ({
+            id: s.id,
+            size: s.size,
+            quantity: s.quantity,
+            isAvailable: s.isAvailable,
+        })),
     }
 }

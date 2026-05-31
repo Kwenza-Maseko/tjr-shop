@@ -112,7 +112,7 @@ const ProductsPage = () => {
     const handleSearch = (value: string) => {
         setSearch(value)
         setPage(1)
-        if (searchTimeout.current) clearTimeout(searchTimeout.current)  // ← replace clearTimeout(searchTimeout.current)
+        if (searchTimeout.current) clearTimeout(searchTimeout.current)  
         searchTimeout.current = setTimeout(() => {
             fetchProducts(value, 1)
         }, 300)
