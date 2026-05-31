@@ -14,7 +14,7 @@ import {
   Phone,
 } from "lucide-react";
 import { getContactDetailsByStoreId } from "@/lib/store/store-contact-details";
-import { help, navitems } from "@/constants";
+import { help } from "@/constants";
 import Link from "next/link";
 import Image from 'next/image'
 
