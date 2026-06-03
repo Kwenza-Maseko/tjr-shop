@@ -60,7 +60,7 @@ const AuthForm = <T extends FieldValues>({
         if (result.success) {
             toast.success(isSignIn ? "Signed in successfully" : "Account created successfully")
             const callbackUrl = searchParams.get("callbackUrl") ?? "/"
-            router.push(callbackUrl)
+            window.location.href = callbackUrl
         } else {
             toast.error(result.error ?? `Failed to ${isSignIn ? "sign in" : "sign up"}`)
         }
