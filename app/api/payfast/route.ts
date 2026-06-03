@@ -1,9 +1,25 @@
 
 import { db } from "@/database/drizzle"
 import { pendingOrdersTable } from "@/database/schema"
-import { generateSignature } from "@/lib/payfast"
 import crypto from "crypto"
 
+function generateSignature(data: Record<string, string>, passphrase: string): string {
+  const phpEncode = (val: string) =>
+    encodeURIComponent(val)
+      .replace(/%20/g, "+")
+      .replace(/\(/g, "%28")
+      .replace(/\)/g, "%29")
+
+  const queryString = Object.entries(data)
+    .map(([key, val]) => `${key}=${phpEncode(val.trim())}`)
+    .join("&")
+
+  const stringToSign = passphrase
+    ? `${queryString}&passphrase=${phpEncode(passphrase.trim())}`
+    : queryString
+
+  return crypto.createHash("md5").update(stringToSign).digest("hex")
+}
 
 export async function POST(req: Request) {
   try {
