@@ -1,13 +1,13 @@
 'use client'
+import { Suspense } from "react"
 import AuthForm from '@/components/Authform'
 import { signInWithCredentials } from '@/lib/auth/auth'
 import { signInSchema } from '@/lib/validation'
-import React from 'react'
 
-const SignIn = () => {
+function SignInContent() {
   return (
     <div>
-       <AuthForm
+      <AuthForm
         type="SIGNIN"
         schema={signInSchema}
         defaultValues={{
@@ -20,4 +20,10 @@ const SignIn = () => {
   )
 }
 
-export default SignIn
+export default function SignInPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignInContent />
+    </Suspense>
+  )
+}

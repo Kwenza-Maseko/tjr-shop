@@ -2,10 +2,10 @@
 import AuthForm from '@/components/Authform'
 import { signUp } from '@/lib/auth/auth'
 import { signUpSchema } from '@/lib/validation'
-import React from 'react'
+import { Suspense } from 'react'
 
 
-const SignUp = () => {
+const SignUpContent = () => {
   return ( 
     <div>
         <AuthForm
@@ -22,4 +22,10 @@ const SignUp = () => {
   )
 }
 
-export default SignUp
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignUpContent />
+    </Suspense>
+  )
+}
