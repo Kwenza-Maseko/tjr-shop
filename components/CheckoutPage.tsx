@@ -13,6 +13,18 @@ import {
 import { Button } from '@/components/ui/button'
 import { useState } from "react"
 import { useAuth } from "./providers/AuthProvider"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
+
 
 interface CheckoutProps {
   cartItems: Record<string, unknown>[]
@@ -47,6 +59,29 @@ interface PayfastData {
   [keyValue: string]: string
 }
 
+interface AlertProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function Alert({ open, onClose }: AlertProps) {
+  return (
+    <AlertDialog open={open} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Select Shipping Method</AlertDialogTitle>
+          <AlertDialogDescription>
+            Please select a shipping method to proceed with payment
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={onClose}>Okay</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
 
   const [load, setLoading] = useState(false)
@@ -59,7 +94,7 @@ const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
     postalCode: "",
   })
   const [addressErrors, setAddressErrors] = useState<Partial<DeliveryAddress>>({})
-
+  const [showAlert, setShowAlert] = useState(false);
   const { user, loading } = useAuth()
 
   if (loading) return <p>Loading...</p>
@@ -123,8 +158,8 @@ const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
   const payWithPayfast = async () => {
     try {
       if (!selectedShipping) {
-        alert("Please select a shipping method")
-        return
+        setShowAlert(true);
+        return;
       }
 
       if (selectedShipping === "delivery" && !validateAddress()) {
@@ -182,6 +217,7 @@ const CheckoutPage = ({ cartItems, cartSubtotal }: CheckoutProps) => {
 
   return (
     <div className='mt-8 px-6 md:px-8 flex justify-center'>
+      <Alert open={showAlert} onClose={() => setShowAlert(false)} />
       <div className="w-full md:w-[800px] flex flex-col gap-4 items-center">
 
         <h1 className="text-lg font-bold">Checkout</h1>

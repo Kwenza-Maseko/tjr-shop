@@ -211,42 +211,35 @@ export const shippingMethodEnum = pgEnum("shipping_method", ["PICKUP", "DELIVERY
 export const ordersTable = pgTable("orders", {
   id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
 
-  // Customer
   userId: uuid("user_id")
     .notNull()
     .references(() => userTable.id, { onDelete: "cascade" }),
 
-  // PayFast
   mPaymentId: varchar("m_payment_id", { length: 100 }).notNull().unique(),
   pfPaymentId: varchar("pf_payment_id", { length: 100 }),
   paymentStatus: varchar("payment_status", { length: 50 }).default("PENDING"),
 
-  // Order
   status: orderStatusEnum("status").default("PENDING"),
   shippingMethod: shippingMethodEnum("shipping_method").notNull(),
 
-  // Amounts
   subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
 
-  // Cart snapshot: [{ productId, productName, imageUrl, quantity, priceSnapshot, discountSnapshot }]
   items: jsonb("items").notNull(),
 
-  // Customer snapshot
   customerName: varchar("customer_name", { length: 255 }),
   customerEmail: text("customer_email"),
 
-  // ✅ Delivery address — structured fields instead of a single varchar
   deliveryStreetAddress: varchar("delivery_street_address", { length: 255 }),
   deliverySuburb: varchar("delivery_suburb", { length: 100 }),
   deliveryCity: varchar("delivery_city", { length: 100 }),
   deliveryProvince: varchar("delivery_province", { length: 100 }),
   deliveryPostalCode: varchar("delivery_postal_code", { length: 4 }),
 
-  // Timestamps
   paidAt: timestamp("paid_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  successToken: varchar("success_token", { length: 64 }),
 });
 
 export const pendingOrdersTable = pgTable("pending_orders", {

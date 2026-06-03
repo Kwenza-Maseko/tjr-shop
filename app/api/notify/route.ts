@@ -5,6 +5,7 @@ import crypto from "crypto"
 
 interface PendingOrderData {
   amount: string | number
+  successToken?: string 
   shipping_method: string
   cartItems: {
     productId: string
@@ -148,6 +149,7 @@ export async function POST(req: Request) {
           deliveryProvince: deliveryAddress.province,
           deliveryPostalCode: deliveryAddress.postalCode,
         } : {}),
+        successToken: pendingData.successToken ?? null,
       })
       .returning()
 

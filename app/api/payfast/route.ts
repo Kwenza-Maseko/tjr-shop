@@ -2,6 +2,9 @@
 import { db } from "@/database/drizzle"
 import { pendingOrdersTable } from "@/database/schema"
 import crypto from "crypto"
+import { randomBytes } from "crypto"
+
+const successToken = randomBytes(32).toString("hex")
 
 function generateSignature(data: Record<string, string>, passphrase: string): string {
   const phpEncode = (val: string) =>
@@ -47,6 +50,7 @@ export async function POST(req: Request) {
       id: paymentId,
       data: {
         amount,
+        successToken, 
         shipping_method,
         cartItems,
         deliveryAddress: shipping_method === "delivery" ? deliveryAddress : null,
@@ -57,7 +61,7 @@ export async function POST(req: Request) {
     const data: Record<string, string> = {
       merchant_id: merchant_id.trim(),
       merchant_key: merchant_key.trim(),
-      return_url: "https://tjr-shop.vercel.app/success",
+      return_url: `https://tjr-shop.vercel.app/success?token=${successToken}&ref=${paymentId}`,
       cancel_url: "https://tjr-shop.vercel.app/cancel",
       notify_url: "https://tjr-shop.vercel.app/api/notify",
       name_first,
@@ -65,7 +69,7 @@ export async function POST(req: Request) {
       email_address: (customer?.email || "tjrshoponlinecustomer@tjr.com").trim(),
       m_payment_id: paymentId,
       amount: Number(amount).toFixed(2),
-      item_name: `${item_name} (${shipping_method})`,
+      item_name: `${cartItems.product_name} (${shipping_method})`,
     }
     const signature = generateSignature(data, passphrase)
 

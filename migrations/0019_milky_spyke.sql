@@ -1,0 +1,1 @@
+ALTER TABLE "orders" ADD COLUMN "success_token" varchar(64);

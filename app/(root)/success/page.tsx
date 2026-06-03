@@ -1,7 +1,31 @@
+import { redirect } from 'next/navigation'
+import { db } from '@/database/drizzle'
+import { ordersTable } from '@/database/schema'
+import { eq } from 'drizzle-orm'
 import { CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 
-export default function SuccessPage() {
+export default async function SuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string; ref?: string }>
+}) {
+  const { token, ref } = await searchParams
+
+  if (!token || !ref) {
+    redirect("/")
+  }
+
+  const [order] = await db
+    .select({ id: ordersTable.id, successToken: ordersTable.successToken })
+    .from(ordersTable)
+    .where(eq(ordersTable.mPaymentId, ref))
+    .limit(1)
+
+  if (!order || order.successToken !== token) {
+    redirect("/")
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-6">
@@ -40,7 +64,7 @@ export default function SuccessPage() {
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
-            href="/store"
+            href="/"
             className="flex-1 py-2.5 text-sm border border-zinc-200 rounded-xl text-zinc-700 hover:bg-zinc-50 transition-colors text-center"
           >
             Back to store
