@@ -15,6 +15,7 @@ export default function Store() {
     const [products, setProducts] = useState<ProductWithDeal[]>([])
     const [loading, setLoading] = useState(true)
     const { brand, color, priceRange } = useFilter()
+    
     const priceFilter = (() => {
         if (priceRange === "R0 - R500") return { priceMin: 0, priceMax: 500 }
         if (priceRange === "R500 - R1000") return { priceMin: 500, priceMax: 1000 }
@@ -49,7 +50,6 @@ export default function Store() {
 
     return (
         <div className="p-4 md:p-10 space-y-5">
-            {/* Skeleton */}
             {loading && (
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {Array.from({ length: 8 }).map((_, i) => (

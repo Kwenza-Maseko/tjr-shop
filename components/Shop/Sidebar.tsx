@@ -37,15 +37,13 @@ const Sidebar = ({ user }: SidebarProps) => {
     });
     return (
         <div className="fixed left-0 top-0 h-dvh w-60 bg-zinc-50 text-white border-r flex flex-col z-30">
-            {/* Store Info */}
             <div className="py-3 px-4 border-b">
                 <div className="flex gap-3 items-center ">
                     <Image
-                        src={"/assets/digitalmove-logo.png"}
+                        src={"/assets/tjr-logo.png"}
                         width={35}
                         height={35}
                         alt='digitalmove-logo'
-                        className="invert"
                     />
                     <div className='w-34'>
                         <h2 className="text-md text-black font-bold truncate">TJR Shop</h2>

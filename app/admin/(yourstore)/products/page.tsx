@@ -85,7 +85,6 @@ const ProductsPage = () => {
     const [sidebarLoading, setSidebarLoading] = useState(false)
     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    // ── Fetch paginated + searched products ─────────────────────────────────────
     const fetchProducts = useCallback(async (q: string, p: number) => {
         setSidebarLoading(true)
         try {
@@ -108,7 +107,6 @@ const ProductsPage = () => {
         fetchProducts(search, page)
     }, [page])
 
-    // Debounce search
     const handleSearch = (value: string) => {
         setSearch(value)
         setPage(1)

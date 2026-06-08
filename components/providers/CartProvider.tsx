@@ -20,7 +20,6 @@ const CartContext = createContext<CartContextType>({
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cartCount, setCartCount] = useState(0)
 
-  // One DB read on mount to get the real count
   useEffect(() => {
     fetch('/api/cart/count')
       .then(r => r.json())

@@ -70,8 +70,8 @@ const ImageUpload = ({
 
     const onValidate = (file: File) => {
         if (type === 'image') {
-            if (file.size > 5 * 1024 * 1024) {
-                toast('File is too large — upload a file smaller than 5 MB')
+            if (file.size > 2 * 1024 * 1024) {
+                toast('File is too large — upload a file smaller than 2 MB')
                 return false;
             }
         }

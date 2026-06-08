@@ -33,10 +33,15 @@ const ProductClient = ({ userId }: { userId: string }) => {
             setProduct(selectedProduct as ProductWithDeal)
             return
         }
+        const fromStore = useProductStore.getState().getProductById(id)
+        if (fromStore) {
+            setProduct(fromStore as ProductWithDeal)
+            return
+        }
         getProductById(id).then(data => {
             if (data) setProduct(data)
         })
-    }, [id, selectedProduct])
+    }, [id, selectedProduct]);
 
     if (!product) return <p className="p-6 text-gray-500">Loading product...</p>
 

@@ -1,4 +1,4 @@
-// app/products/[id]/page.tsx
+
 import ProductClient from "@/components/ProductClient";
 import { auth } from "@/userAuth";
 import { redirect } from "next/navigation";

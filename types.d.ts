@@ -60,6 +60,12 @@ export interface ProductParams {
   relatedProducts: string[] | null
   variants: Record<string, string[]> | null
   brand: string | null
+  sizes?: {
+    id: string
+    size: string
+    quantity: number
+    isAvailable: boolean
+  }[]
 }
 
 export interface Deals {

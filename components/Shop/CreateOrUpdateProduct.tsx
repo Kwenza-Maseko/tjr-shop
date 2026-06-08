@@ -171,7 +171,6 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                 brand: productToEdit.brand ?? null,
             })
         } else {
-            // New product — clear everything
             form.reset({
                 id: '', productName: '', imageUrl: '', description: null,
                 productTarget: '', productType: null, color: null,
@@ -449,7 +448,6 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
                                             <Select
                                                 onValueChange={(val) => {
                                                     field.onChange(val)
-                                                    // Reset downstream when target changes
                                                     form.setValue('category', null)
                                                     form.setValue('productType', null)
                                                 }}

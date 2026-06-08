@@ -15,7 +15,7 @@ type MediaItem = {
 const { urlEndpoint, publicKey } = config.env.imagekit;
 
 interface MediaImagesProps {
-  onSelect: (item: MediaItem) => void; // Callback when user clicks image
+  onSelect: (item: MediaItem) => void; 
 }
 
 const MediaImages = ({ onSelect }: MediaImagesProps) => {
@@ -34,10 +34,10 @@ const MediaImages = ({ onSelect }: MediaImagesProps) => {
   const handleImageChange = async (filePath: string) => {
     const result = await uploadImage(filePath);
     if (result.success) {
-      toast("✅ Image inserted into media table");
+      toast("Image inserted into media table");
       fetchMedia();
     } else {
-      toast("❌ Failed to insert image");
+      toast("Failed to insert image");
     }
   };
 

@@ -38,7 +38,7 @@ const ForgotPassword = () => {
       }
 
       if (res.ok) {
-        toast.success(data.message || "If the email exists, check your inbox.");
+        toast.success(data.message || "If the email exists, check your inbox or spam");
         setEmail("");
       } else {
         toast.error(data.error || "Something went wrong. Please try again.");

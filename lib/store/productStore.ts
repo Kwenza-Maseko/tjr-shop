@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { ProductParams } from "@/types";
+import { ProductWithDeal } from "@/lib/store/deals";
 
 interface ProductStore {
   products: ProductParams[] | null;
-  selectedProduct: ProductParams | null;
+  selectedProduct: ProductWithDeal | null; 
   setProducts: (products: ProductParams[]) => void;
-  setSelectedProduct: (product: ProductParams | null) => void;
+  setSelectedProduct: (product: ProductWithDeal | null) => void;
   getProductById: (id: string) => ProductParams | undefined;
 }
 

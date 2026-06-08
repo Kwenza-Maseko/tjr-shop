@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
     boolean,
     date,
+    index,
     integer,
     jsonb,
     numeric,
@@ -50,7 +51,9 @@ export const adminTable = pgTable("admin", {
     }).defaultNow(),
     passwordResetToken: varchar("password_reset_token", { length: 255 }),
     passwordResetExpires: timestamp("password_reset_expires", { withTimezone: true })
-});
+}, (table) => [
+  index("admin_access_granted_idx").on(table.accessGranted),
+]);
 
 export const storeHeadline = pgTable("storeheadline", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -122,7 +125,11 @@ export const cartTable = pgTable("cart", {
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("cart_user_id_idx").on(table.userId),
+  index("cart_product_id_idx").on(table.productId),
+  index("cart_user_active_idx").on(table.userId, table.isActive),
+]);
 
 export const deals = pgTable("deals", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -139,7 +146,10 @@ export const dealProducts = pgTable("deal_products", {
     productId: uuid("product_id")
         .notNull()
         .references(() => productTable.id, { onDelete: "cascade" }),
-});
+}, (table) => [
+  index("deal_products_deal_id_idx").on(table.dealId),
+  index("deal_products_product_id_idx").on(table.productId),
+]);
 
 export const dealTimeSpan = pgTable("deal_time_span", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -147,7 +157,10 @@ export const dealTimeSpan = pgTable("deal_time_span", {
         .notNull()
         .references(() => deals.id, { onDelete: "cascade" }),
     timeSpan: timestamp("time_span", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("deal_time_span_deal_id_idx").on(table.dealId),
+  index("deal_time_span_time_span_idx").on(table.timeSpan),
+]);
 
 export const productTable = pgTable("products", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -181,7 +194,13 @@ export const productTable = pgTable("products", {
     createdAt: timestamp("created_at", {
         withTimezone: true,
     }).defaultNow(),
-});
+}, (table) => [
+  index("products_target_idx").on(table.productTarget),
+  index("products_category_idx").on(table.category),
+  index("products_brand_idx").on(table.brand),
+  index("products_is_active_idx").on(table.isActive),
+  index("products_target_category_idx").on(table.productTarget, table.category),
+]);
 
 export const productSizes = pgTable("product_sizes", {
     id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -193,8 +212,9 @@ export const productSizes = pgTable("product_sizes", {
     isAvailable: boolean("is_available").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-})
-
+}, (table) => [
+  index("product_sizes_product_id_idx").on(table.productId),
+])
 
 export const orderStatusEnum = pgEnum("order_status", [
   "PENDING",
@@ -240,7 +260,12 @@ export const ordersTable = pgTable("orders", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   successToken: varchar("success_token", { length: 64 }),
-});
+}, (table) => [
+  index("orders_user_id_idx").on(table.userId),
+  index("orders_status_idx").on(table.status),
+  index("orders_m_payment_id_idx").on(table.mPaymentId),
+  index("orders_payment_status_idx").on(table.paymentStatus),
+]);
 
 export const pendingOrdersTable = pgTable("pending_orders", {
   id: text("id").primaryKey(),

@@ -410,6 +410,11 @@ export const getProductsByCategory = async (
     }
 }
 
+
+
+
+
+
 export const getAllProducts = async (
     filters?: {
         brand?: string
@@ -433,7 +438,7 @@ export const getAllProducts = async (
     if (filters?.priceMax != null)
         conditions.push(lte(productTable.price, String(filters.priceMax)))
 
-    const [rows, countRows] = await Promise.all([
+    const [rows, countRows, sizeRows] = await Promise.all([
         db
             .select({
                 id: productTable.id,
@@ -473,7 +478,40 @@ export const getAllProducts = async (
             .select({ count: count() })
             .from(productTable)
             .where(and(...conditions)),
+
+        db
+            .select({
+                id: productSizes.id,
+                productId: productSizes.productId,
+                size: productSizes.size,
+                quantity: productSizes.quantity,
+                isAvailable: productSizes.isAvailable,
+            })
+            .from(productSizes),
     ])
+
+
+
+    const sizesByProduct: Record<
+        string,
+        {
+            id: string
+            size: string
+            quantity: number
+            isAvailable: boolean
+        }[]
+    > = {}
+
+    for (const size of sizeRows) {
+        sizesByProduct[size.productId] ??= []
+
+        sizesByProduct[size.productId].push({
+            id: size.id,
+            size: size.size,
+            quantity: size.quantity,
+            isAvailable: size.isAvailable,
+        })
+    }
 
     if (!rows.length) return null
 
@@ -491,10 +529,16 @@ export const getAllProducts = async (
             variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
+
+            sizes: sizesByProduct[r.id] ?? [],
         })),
         total: Number(countRows[0].count),
     }
 }
+
+
+
+
 
 export const getAllTargetedProducts = async (
     productTarget: string,
@@ -522,7 +566,7 @@ export const getAllTargetedProducts = async (
     if (filters?.priceMax != null)
         conditions.push(lte(productTable.price, String(filters.priceMax)))
 
-    const [rows, countRows] = await Promise.all([
+    const [rows, countRows, sizeRows] = await Promise.all([
         db
             .select({
                 id: productTable.id,
@@ -561,7 +605,40 @@ export const getAllTargetedProducts = async (
             .select({ count: count() })
             .from(productTable)
             .where(and(...conditions)),
+
+        db
+            .select({
+                id: productSizes.id,
+                productId: productSizes.productId,
+                size: productSizes.size,
+                quantity: productSizes.quantity,
+                isAvailable: productSizes.isAvailable,
+            })
+            .from(productSizes),
     ])
+
+
+    const sizesByProduct: Record<
+        string,
+        {
+            id: string
+            size: string
+            quantity: number
+            isAvailable: boolean
+        }[]
+    > = {}
+
+    for (const size of sizeRows) {
+        sizesByProduct[size.productId] ??= []
+
+        sizesByProduct[size.productId].push({
+            id: size.id,
+            size: size.size,
+            quantity: size.quantity,
+            isAvailable: size.isAvailable,
+        })
+    }
+
 
     if (!rows.length) return null
 
@@ -579,6 +656,7 @@ export const getAllTargetedProducts = async (
             variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
+            sizes: sizesByProduct[r.id] ?? [],
         })),
         total: Number(countRows[0].count),
     }
@@ -613,7 +691,7 @@ export const getAllProductsType = async (
     if (filters?.priceMax != null)
         conditions.push(lte(productTable.price, String(filters.priceMax)))
 
-    const [rows, countRows] = await Promise.all([
+    const [rows, countRows, sizeRows] = await Promise.all([
         db
             .select({
                 id: productTable.id,
@@ -652,7 +730,38 @@ export const getAllProductsType = async (
             .select({ count: count() })
             .from(productTable)
             .where(and(...conditions)),
+        db
+            .select({
+                id: productSizes.id,
+                productId: productSizes.productId,
+                size: productSizes.size,
+                quantity: productSizes.quantity,
+                isAvailable: productSizes.isAvailable,
+            })
+            .from(productSizes),
     ])
+
+
+    const sizesByProduct: Record<
+        string,
+        {
+            id: string
+            size: string
+            quantity: number
+            isAvailable: boolean
+        }[]
+    > = {}
+
+    for (const size of sizeRows) {
+        sizesByProduct[size.productId] ??= []
+
+        sizesByProduct[size.productId].push({
+            id: size.id,
+            size: size.size,
+            quantity: size.quantity,
+            isAvailable: size.isAvailable,
+        })
+    }
 
     if (!rows.length) return null
 
@@ -670,6 +779,7 @@ export const getAllProductsType = async (
             variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
+            sizes: sizesByProduct[r.id] ?? [],
         })),
         total: Number(countRows[0].count),
     }
