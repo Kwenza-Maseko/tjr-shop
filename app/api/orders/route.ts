@@ -1,4 +1,3 @@
-// app/api/orders/route.ts — fetch all orders
 
 import { db } from "@/database/drizzle"
 import { ordersTable } from "@/database/schema"

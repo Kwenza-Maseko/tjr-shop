@@ -19,14 +19,14 @@ const { urlEndpoint, publicKey } = config.env.imagekit
 
 interface User {
     id: string
-    name: string
+    fullName: string
     email: string
     image?: string
 }
 
 interface Product {
     id: string
-    name: string
+    productName: string
     imageUrl?: string
 }
 
@@ -73,7 +73,7 @@ function Avatar({ user }: { user: User }) {
         return (
             <img
                 src={user.image}
-                alt={user.name}
+                alt={user.fullName}
                 className="w-8 h-8 rounded-full object-cover flex-shrink-0"
             />
         )
@@ -83,7 +83,7 @@ function Avatar({ user }: { user: User }) {
             className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0"
             style={{ background: col.bg, color: col.color }}
         >
-            {initials(user.name)}
+            {initials(user.fullName)}
         </div>
     )
 }
@@ -167,8 +167,8 @@ export default function CartDashboard() {
         if (search.trim()) {
             const q = search.toLowerCase()
             data = data.filter(i =>
-                (i.product?.name ?? i.productId).toLowerCase().includes(q) ||
-                (i.user?.name ?? i.userId).toLowerCase().includes(q) ||
+                (i.product?.productName ?? i.productId).toLowerCase().includes(q) ||
+                (i.user?.fullName ?? i.userId).toLowerCase().includes(q) ||
                 (i.user?.email ?? '').toLowerCase().includes(q)
             )
         }
@@ -305,7 +305,7 @@ export default function CartDashboard() {
                                         </TableCell>
                                     </TableRow>
                                 ) : paginated.map(item => {
-                                    const productName = item.product?.name ?? item.productId
+                                    const productName = item.product?.productName ?? item.productId
                                     const user = item.user
                                     const discounted = item.discountSnapshot > 0
                                     const finalPrice = discounted
@@ -317,7 +317,7 @@ export default function CartDashboard() {
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 border border-border">
-                                                        {item.imageUrl ? (
+                                                        {item.product?.imageUrl ? (
                                                             <IKImage
                                                                 path={item.imageUrl}
                                                                 alt={productName}
@@ -331,7 +331,6 @@ export default function CartDashboard() {
                                                     </div>
                                                     <div>
                                                         <p className="text-sm font-medium leading-none">{productName}</p>
-                                                        <p className="text-[11px] text-muted-foreground font-mono mt-1">{item.productId}</p>
                                                     </div>
                                                 </div>
                                             </TableCell>
@@ -390,7 +389,7 @@ export default function CartDashboard() {
                                                     <div className="flex items-center gap-2">
                                                         <Avatar user={user} />
                                                         <div>
-                                                            <p className="text-xs font-medium leading-none">{user.name}</p>
+                                                            <p className="text-xs font-medium leading-none">{user.fullName}</p>
                                                             <p className="text-[11px] text-muted-foreground mt-0.5">{user.email}</p>
                                                         </div>
                                                     </div>
