@@ -39,7 +39,6 @@ type CreateOrUpdateProductParams = {
 }
 
 type MediaItem = { id: string; imageUrl: string }
-// NEW: what the media modal is being opened for
 type MediaTarget = 'thumbnail' | 'slide'
 
 const { urlEndpoint, publicKey } = config.env.imagekit
@@ -293,17 +292,12 @@ function MultiColorPicker({
     )
 }
 
-
 // ─── Main ─────────────────────────────────────────────────────────────────────
-
-
 
 const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdateProductParams) => {
     const [loading, setLoading] = useState(false)
     const [selectedImage, setSelectedImage] = useState<MediaItem | null>(null)
     const [openMedia, setOpenMedia] = useState(false)
-    const [isColorPickerOpen, setIsColorPickerOpen] = useState(false)
-    const [textColor, setTextColor] = useState('#000000')
     const [brandOpen, setBrandOpen] = useState(false)
     const [customBrand, setCustomBrand] = useState('')
     const [mediaTarget, setMediaTarget] = useState<MediaTarget>('thumbnail')
@@ -354,7 +348,6 @@ const CreateOrUpdateProduct = ({ productToEdit, mode, onSuccess }: CreateOrUpdat
 
     useEffect(() => {
         if (productToEdit) {
-            // Editing — fill form with product data
             form.reset({
                 id: productToEdit.id,
                 productName: productToEdit.productName,

@@ -10,7 +10,7 @@ export const CATEGORIES_BY_TARGET: Record<string, string[]> = {
 
 export const PRODUCT_TYPES_BY_CATEGORY: Record<string, string[]> = {
   Clothing: [
-    'All Clothing', 'Tops and T Shirts', 'Hoodies and Sweatshirts',
+    'All Clothing', 'Tops and T Shirts', 'Hoodies and Sweatshirts', 'Dress',
     'Shorts', 'Trousers', 'Leggings', 'Matching Sets',
     'Tracksuits', 'Jackets', 'Sports Bras', 'Accessories',
   ],
