@@ -52,7 +52,7 @@ export const adminTable = pgTable("admin", {
     passwordResetToken: varchar("password_reset_token", { length: 255 }),
     passwordResetExpires: timestamp("password_reset_expires", { withTimezone: true })
 }, (table) => [
-  index("admin_access_granted_idx").on(table.accessGranted),
+    index("admin_access_granted_idx").on(table.accessGranted),
 ]);
 
 export const storeHeadline = pgTable("storeheadline", {
@@ -113,7 +113,7 @@ export const cartTable = pgTable("cart", {
         .references(() => productTable.id, { onDelete: "cascade" }),
 
     imageUrl: varchar("imageUrl", { length: 500 }).notNull(),
-    
+
     quantity: integer("quantity").notNull().default(1),
 
     priceSnapshot: numeric("price_snapshot", { precision: 10, scale: 2 }),
@@ -126,9 +126,9 @@ export const cartTable = pgTable("cart", {
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
-  index("cart_user_id_idx").on(table.userId),
-  index("cart_product_id_idx").on(table.productId),
-  index("cart_user_active_idx").on(table.userId, table.isActive),
+    index("cart_user_id_idx").on(table.userId),
+    index("cart_product_id_idx").on(table.productId),
+    index("cart_user_active_idx").on(table.userId, table.isActive),
 ]);
 
 export const deals = pgTable("deals", {
@@ -147,8 +147,8 @@ export const dealProducts = pgTable("deal_products", {
         .notNull()
         .references(() => productTable.id, { onDelete: "cascade" }),
 }, (table) => [
-  index("deal_products_deal_id_idx").on(table.dealId),
-  index("deal_products_product_id_idx").on(table.productId),
+    index("deal_products_deal_id_idx").on(table.dealId),
+    index("deal_products_product_id_idx").on(table.productId),
 ]);
 
 export const dealTimeSpan = pgTable("deal_time_span", {
@@ -158,8 +158,8 @@ export const dealTimeSpan = pgTable("deal_time_span", {
         .references(() => deals.id, { onDelete: "cascade" }),
     timeSpan: timestamp("time_span", { withTimezone: true }).defaultNow(),
 }, (table) => [
-  index("deal_time_span_deal_id_idx").on(table.dealId),
-  index("deal_time_span_time_span_idx").on(table.timeSpan),
+    index("deal_time_span_deal_id_idx").on(table.dealId),
+    index("deal_time_span_time_span_idx").on(table.timeSpan),
 ]);
 
 export const productTable = pgTable("products", {
@@ -169,8 +169,8 @@ export const productTable = pgTable("products", {
     description: varchar("description", { length: 255 }),
     productTarget: varchar("product_target", { length: 255 }).notNull(),
     productType: varchar("product_type", { length: 120 }),
-    color: varchar("color", { length: 100 }),
-
+    color: jsonb("color"),           // was varchar → now stores string[]
+    slideImages: jsonb("slide_images"), // NEW column for image array
     price: numeric("price", { precision: 10, scale: 2 }).notNull(), // product price
     discountPrice: numeric("discount_price", { precision: 10, scale: 2 }), // optional sale price
     stock: integer("stock").default(0), // quantity available
@@ -195,11 +195,11 @@ export const productTable = pgTable("products", {
         withTimezone: true,
     }).defaultNow(),
 }, (table) => [
-  index("products_target_idx").on(table.productTarget),
-  index("products_category_idx").on(table.category),
-  index("products_brand_idx").on(table.brand),
-  index("products_is_active_idx").on(table.isActive),
-  index("products_target_category_idx").on(table.productTarget, table.category),
+    index("products_target_idx").on(table.productTarget),
+    index("products_category_idx").on(table.category),
+    index("products_brand_idx").on(table.brand),
+    index("products_is_active_idx").on(table.isActive),
+    index("products_target_category_idx").on(table.productTarget, table.category),
 ]);
 
 export const productSizes = pgTable("product_sizes", {
@@ -213,62 +213,62 @@ export const productSizes = pgTable("product_sizes", {
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
-  index("product_sizes_product_id_idx").on(table.productId),
+    index("product_sizes_product_id_idx").on(table.productId),
 ])
 
 export const orderStatusEnum = pgEnum("order_status", [
-  "PENDING",
-  "PAID",
-  "PROCESSING",
-  "SHIPPED",
-  "DELIVERED",
-  "CANCELLED",
-  "REFUNDED"
+    "PENDING",
+    "PAID",
+    "PROCESSING",
+    "SHIPPED",
+    "DELIVERED",
+    "CANCELLED",
+    "REFUNDED"
 ]);
 
 export const shippingMethodEnum = pgEnum("shipping_method", ["PICKUP", "DELIVERY"]);
 
 export const ordersTable = pgTable("orders", {
-  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
 
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => userTable.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+        .notNull()
+        .references(() => userTable.id, { onDelete: "cascade" }),
 
-  mPaymentId: varchar("m_payment_id", { length: 100 }).notNull().unique(),
-  pfPaymentId: varchar("pf_payment_id", { length: 100 }),
-  paymentStatus: varchar("payment_status", { length: 50 }).default("PENDING"),
+    mPaymentId: varchar("m_payment_id", { length: 100 }).notNull().unique(),
+    pfPaymentId: varchar("pf_payment_id", { length: 100 }),
+    paymentStatus: varchar("payment_status", { length: 50 }).default("PENDING"),
 
-  status: orderStatusEnum("status").default("PENDING"),
-  shippingMethod: shippingMethodEnum("shipping_method").notNull(),
+    status: orderStatusEnum("status").default("PENDING"),
+    shippingMethod: shippingMethodEnum("shipping_method").notNull(),
 
-  subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
-  total: numeric("total", { precision: 10, scale: 2 }).notNull(),
+    subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
+    total: numeric("total", { precision: 10, scale: 2 }).notNull(),
 
-  items: jsonb("items").notNull(),
+    items: jsonb("items").notNull(),
 
-  customerName: varchar("customer_name", { length: 255 }),
-  customerEmail: text("customer_email"),
+    customerName: varchar("customer_name", { length: 255 }),
+    customerEmail: text("customer_email"),
 
-  deliveryStreetAddress: varchar("delivery_street_address", { length: 255 }),
-  deliverySuburb: varchar("delivery_suburb", { length: 100 }),
-  deliveryCity: varchar("delivery_city", { length: 100 }),
-  deliveryProvince: varchar("delivery_province", { length: 100 }),
-  deliveryPostalCode: varchar("delivery_postal_code", { length: 4 }),
+    deliveryStreetAddress: varchar("delivery_street_address", { length: 255 }),
+    deliverySuburb: varchar("delivery_suburb", { length: 100 }),
+    deliveryCity: varchar("delivery_city", { length: 100 }),
+    deliveryProvince: varchar("delivery_province", { length: 100 }),
+    deliveryPostalCode: varchar("delivery_postal_code", { length: 4 }),
 
-  paidAt: timestamp("paid_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-  successToken: varchar("success_token", { length: 64 }),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+    successToken: varchar("success_token", { length: 64 }),
 }, (table) => [
-  index("orders_user_id_idx").on(table.userId),
-  index("orders_status_idx").on(table.status),
-  index("orders_m_payment_id_idx").on(table.mPaymentId),
-  index("orders_payment_status_idx").on(table.paymentStatus),
+    index("orders_user_id_idx").on(table.userId),
+    index("orders_status_idx").on(table.status),
+    index("orders_m_payment_id_idx").on(table.mPaymentId),
+    index("orders_payment_status_idx").on(table.paymentStatus),
 ]);
 
 export const pendingOrdersTable = pgTable("pending_orders", {
-  id: text("id").primaryKey(),
-  data: jsonb("data").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+    id: text("id").primaryKey(),
+    data: jsonb("data").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
 })

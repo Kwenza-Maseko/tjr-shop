@@ -41,11 +41,12 @@ export interface MediaParams {
 export interface ProductParams {
   id?: string
   productName: string
-  imageUrl: string
+  imageUrl: string           // keep as primary/thumbnail image
+  slideImages: string[] | null  // NEW – array of slide image paths
   description: string | null
   productTarget: string
   productType: string | null
-  color: string | null
+  color: string[] | null     // CHANGED – was string | null
   price: number
   discountPrice: number | null
   stock: number
@@ -67,7 +68,6 @@ export interface ProductParams {
     isAvailable: boolean
   }[]
 }
-
 export interface Deals {
   id: string;
   dealCoupon: string;

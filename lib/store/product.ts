@@ -5,6 +5,76 @@ import { productTable } from "@/database/schema";
 import { ProductParams } from "@/types";
 import { eq, or, and, isNotNull } from "drizzle-orm";
 
+// ─── Shared normalizer ────────────────────────────────────────────────────────
+
+function normalizeProduct(item: typeof productTable.$inferSelect): ProductParams {
+  return {
+    id: item.id,
+    productName: item.productName,
+    imageUrl: item.imageUrl,
+    slideImages: Array.isArray(item.slideImages)
+      ? (item.slideImages as string[])
+      : null,
+    description: item.description ?? null,
+    productTarget: item.productTarget,
+    productType: item.productType ?? null,
+    color: Array.isArray(item.color)
+      ? (item.color as string[])
+      : null,
+    price: Number(item.price),
+    discountPrice: item.discountPrice !== null ? Number(item.discountPrice) : null,
+    stock: item.stock ?? 0,
+    sku: item.sku,
+    category: item.category ?? null,
+    tags: item.tags ?? null,
+    weight: item.weight !== null ? Number(item.weight) : null,
+    dimensions: item.dimensions ?? null,
+    rating: item.rating !== null ? Number(item.rating) : 0,
+    reviewCount: item.reviewCount ?? 0,
+    isActive: item.isActive ?? true,
+    relatedProducts: Array.isArray(item.relatedProducts)
+      ? (item.relatedProducts as string[])
+      : null,
+    variants: (item.variants as Record<string, string[]> | null) ?? null,
+    brand: item.brand ?? null,
+  }
+}
+
+// ─── Shared values builder ────────────────────────────────────────────────────
+
+function buildValues(payload: ProductParams) {
+  return {
+    productName: payload.productName,
+    imageUrl: payload.imageUrl,
+    slideImages: Array.isArray(payload.slideImages) && payload.slideImages.length > 0
+      ? payload.slideImages
+      : null,
+    description: payload.description ?? null,
+    productTarget: payload.productTarget,
+    productType: payload.productType ?? null,
+    // color is now string[] stored as jsonb
+    color: Array.isArray(payload.color) && payload.color.length > 0
+      ? payload.color
+      : null,
+    price: String(payload.price),
+    discountPrice: payload.discountPrice != null ? String(payload.discountPrice) : null,
+    stock: payload.stock ?? 0,
+    sku: payload.sku,
+    category: payload.category ?? null,
+    tags: payload.tags ?? null,
+    weight: payload.weight != null ? String(payload.weight) : null,
+    dimensions: payload.dimensions ?? null,
+    rating: payload.rating != null ? String(payload.rating) : '0',
+    reviewCount: payload.reviewCount ?? 0,
+    isActive: payload.isActive ?? true,
+    relatedProducts: payload.relatedProducts ?? null,
+    variants: payload.variants ?? null,
+    brand: payload.brand ?? null,
+  }
+}
+
+// ─── Queries ──────────────────────────────────────────────────────────────────
+
 export const getStoreProducts = async (
   productType?: string,
   productTarget?: string
@@ -30,29 +100,7 @@ export const getStoreProducts = async (
 
   if (!result || result.length === 0) return null;
 
-  return result.map((item) => ({
-    id: item.id,
-    productName: item.productName,
-    imageUrl: item.imageUrl,
-    description: item.description ?? null,
-    productTarget: item.productTarget,
-    productType: item.productType ?? null,
-    color: item.color ?? null,
-    price: Number(item.price),
-    discountPrice: item.discountPrice !== null ? Number(item.discountPrice) : null,
-    stock: item.stock ?? 0,
-    sku: item.sku,
-    category: item.category ?? null,
-    tags: item.tags ?? null,
-    weight: item.weight !== null ? Number(item.weight) : null,
-    dimensions: item.dimensions ?? null,
-    rating: item.rating !== null ? Number(item.rating) : 0,
-    reviewCount: item.reviewCount ?? 0,
-    isActive: item.isActive ?? true,
-    relatedProducts: (item.relatedProducts as string[] | null) ?? [],
-    variants: (item.variants as Record<string, string[]> | null) ?? {},
-    brand: item.brand ?? null,
-  }));
+  return result.map(normalizeProduct);
 };
 
 export const getLatestProducts = async (): Promise<ProductParams[] | null> => {
@@ -60,59 +108,15 @@ export const getLatestProducts = async (): Promise<ProductParams[] | null> => {
 
   if (result.length === 0) return null;
 
-  return result.map((item) => ({
-    id: item.id,
-    productName: item.productName,
-    imageUrl: item.imageUrl,
-    description: item.description ?? null,
-    productTarget: item.productTarget,
-    productType: item.productType ?? null,
-    color: item.color ?? null,
-    price: Number(item.price),
-    discountPrice: item.discountPrice !== null ? Number(item.discountPrice) : null,
-    stock: item.stock ?? 0,
-    sku: item.sku,
-    category: item.category ?? null,
-    tags: item.tags ?? null,
-    weight: item.weight !== null ? Number(item.weight) : null,
-    dimensions: item.dimensions ?? null,
-    rating: item.rating !== null ? Number(item.rating) : 0,
-    reviewCount: item.reviewCount ?? 0,
-    isActive: item.isActive ?? true,
-    relatedProducts: (item.relatedProducts as string[] | null) ?? [],
-    variants: (item.variants as Record<string, string[]> | null) ?? {},
-    brand: item.brand ?? null,
-  }));
+  return result.map(normalizeProduct);
 };
 
-
+// ─── Mutations ────────────────────────────────────────────────────────────────
 
 export async function createOrUpdateProduct(payload: ProductParams) {
   try {
     const isUpdate = !!payload.id
-
-    const values = {
-      productName: payload.productName,
-      imageUrl: payload.imageUrl,
-      description: payload.description ?? null,
-      productTarget: payload.productTarget,
-      productType: payload.productType ?? null,
-      color: payload.color ?? null,
-      price: String(payload.price),
-      discountPrice: payload.discountPrice != null ? String(payload.discountPrice) : null,
-      stock: payload.stock ?? 0,
-      sku: payload.sku,
-      category: payload.category ?? null,
-      tags: payload.tags ?? null,
-      weight: payload.weight != null ? String(payload.weight) : null,
-      dimensions: payload.dimensions ?? null,
-      rating: payload.rating != null ? String(payload.rating) : '0',
-      reviewCount: payload.reviewCount ?? 0,
-      isActive: payload.isActive ?? true,
-      relatedProducts: payload.relatedProducts ?? null,
-      variants: payload.variants ?? null,
-      brand: payload.brand ?? null,
-    }
+    const values = buildValues(payload)
 
     if (isUpdate) {
       const [updated] = await db
@@ -121,7 +125,7 @@ export async function createOrUpdateProduct(payload: ProductParams) {
         .where(eq(productTable.id, payload.id!))
         .returning()
 
-      return { success: true, data: updated, action: 'updated' }
+      return { success: true, data: normalizeProduct(updated), action: 'updated' }
     }
 
     const [created] = await db
@@ -129,7 +133,7 @@ export async function createOrUpdateProduct(payload: ProductParams) {
       .values(values)
       .returning()
 
-    return { success: true, data: created, action: 'created' }
+    return { success: true, data: normalizeProduct(created), action: 'created' }
 
   } catch (error: unknown) {
     console.error('createOrUpdateProduct error:', error)
@@ -167,8 +171,7 @@ export async function getProducts() {
   }
 }
 
-import { unstable_cache } from 'next/cache'
-
+// ─── Nav helper ───────────────────────────────────────────────────────────────
 
 export const getNavProductTypes = async (): Promise<Record<string, string[]>> => {
   const rows = await db

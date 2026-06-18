@@ -4,7 +4,7 @@ import { ProductWithDeal } from "@/lib/store/deals";
 
 interface ProductStore {
   products: ProductParams[] | null;
-  selectedProduct: ProductWithDeal | null; 
+  selectedProduct: ProductWithDeal | null;
   setProducts: (products: ProductParams[]) => void;
   setSelectedProduct: (product: ProductWithDeal | null) => void;
   getProductById: (id: string) => ProductParams | undefined;

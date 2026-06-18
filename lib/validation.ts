@@ -27,8 +27,8 @@ export const productValidation = z.object({
   description: z.string().nullable().default(null),
   productTarget: z.string().min(1, "Product target is required"),
   productType: z.string().nullable().default(null),
-  color: z.string().nullable().default(null),
-
+  color: z.array(z.string()).nullable().optional(), // was z.string()
+  slideImages: z.array(z.string()).nullable().optional(), // NEW
   // ✅ Use z.preprocess instead of z.coerce to avoid unknown inference
   price: z.preprocess(
     (v) => (v === '' || v == null ? undefined : Number(v)),

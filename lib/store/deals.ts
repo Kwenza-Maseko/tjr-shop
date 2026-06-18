@@ -3,7 +3,7 @@
 import { db } from "@/database/drizzle";
 import { deals, dealProducts, productTable, dealTimeSpan, productSizes } from "@/database/schema";
 import { DealTimeSpan, ProductParams } from "@/types";
-import { and, eq, gte, ilike, lte, count } from "drizzle-orm"
+import { and, eq, gte, ilike, lte, count, sql } from "drizzle-orm"
 
 export type ProductWithDeal = ProductParams & {
     dealCoupon?: string | null
@@ -170,6 +170,7 @@ export const getProductsWithDeals = async (): Promise<(ProductParams & { dealCou
             id: productTable.id,
             productName: productTable.productName,
             imageUrl: productTable.imageUrl,
+            slideImages: productTable.slideImages,
             description: productTable.description,
             productTarget: productTable.productTarget,
             productType: productTable.productType,
@@ -206,6 +207,8 @@ export const getProductsWithDeals = async (): Promise<(ProductParams & { dealCou
         rating: item.rating !== null ? Number(item.rating) : 0,
         reviewCount: item.reviewCount ?? 0,
         isActive: item.isActive ?? true,
+        color: Array.isArray(item.color) ? (item.color as string[]) : null,
+        slideImages: Array.isArray(item.slideImages) ? (item.slideImages as string[]) : null,
         relatedProducts: (item.relatedProducts as string[] | null) ?? [],
         variants: (item.variants as Record<string, string[]> | null) ?? null,
         dealCoupon: item.dealCoupon ?? null,
@@ -342,7 +345,10 @@ export const getProductsByCategory = async (
 
     if (productType) conditions.push(ilike(productTable.productType, productType))
     if (filters?.brand) conditions.push(eq(productTable.brand, filters.brand))
-    if (filters?.color) conditions.push(ilike(productTable.color, filters.color))
+
+    if (filters?.color) conditions.push(
+        sql`${productTable.color} @> ${JSON.stringify([filters.color])}::jsonb`
+    )
     if (filters?.priceMin != null)
         conditions.push(gte(productTable.price, String(filters.priceMin)))
     if (filters?.priceMax != null)
@@ -354,6 +360,7 @@ export const getProductsByCategory = async (
                 id: productTable.id,
                 productName: productTable.productName,
                 imageUrl: productTable.imageUrl,
+                slideImages: productTable.slideImages,
                 description: productTable.description,
                 productTarget: productTable.productTarget,
                 productType: productTable.productType,
@@ -401,6 +408,8 @@ export const getProductsByCategory = async (
             reviewCount: r.reviewCount ?? 0,
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
+            color: Array.isArray(r.color) ? (r.color as string[]) : null,
+            slideImages: Array.isArray(r.slideImages) ? (r.slideImages as string[]) : null,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
             variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
@@ -409,10 +418,6 @@ export const getProductsByCategory = async (
         total: Number(countRows[0].count),
     }
 }
-
-
-
-
 
 
 export const getAllProducts = async (
@@ -432,7 +437,9 @@ export const getAllProducts = async (
     ]
 
     if (filters?.brand) conditions.push(eq(productTable.brand, filters.brand))
-    if (filters?.color) conditions.push(ilike(productTable.color, filters.color))
+    if (filters?.color) conditions.push(
+        sql`${productTable.color} @> ${JSON.stringify([filters.color])}::jsonb`
+    )
     if (filters?.priceMin != null)
         conditions.push(gte(productTable.price, String(filters.priceMin)))
     if (filters?.priceMax != null)
@@ -444,6 +451,7 @@ export const getAllProducts = async (
                 id: productTable.id,
                 productName: productTable.productName,
                 imageUrl: productTable.imageUrl,
+                slideImages: productTable.slideImages,
                 description: productTable.description,
                 productTarget: productTable.productTarget,
                 productType: productTable.productType,
@@ -490,21 +498,9 @@ export const getAllProducts = async (
             .from(productSizes),
     ])
 
-
-
-    const sizesByProduct: Record<
-        string,
-        {
-            id: string
-            size: string
-            quantity: number
-            isAvailable: boolean
-        }[]
-    > = {}
-
+    const sizesByProduct: Record<string, { id: string; size: string; quantity: number; isAvailable: boolean }[]> = {}
     for (const size of sizeRows) {
         sizesByProduct[size.productId] ??= []
-
         sizesByProduct[size.productId].push({
             id: size.id,
             size: size.size,
@@ -525,17 +521,17 @@ export const getAllProducts = async (
             reviewCount: r.reviewCount ?? 0,
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
+            color: Array.isArray(r.color) ? (r.color as string[]) : null,
+            slideImages: Array.isArray(r.slideImages) ? (r.slideImages as string[]) : null,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
             variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
             dealPercentage: r.dealPercentage ?? null,
-
             sizes: sizesByProduct[r.id] ?? [],
         })),
         total: Number(countRows[0].count),
     }
 }
-
 
 
 
@@ -560,7 +556,10 @@ export const getAllTargetedProducts = async (
     ]
 
     if (filters?.brand) conditions.push(eq(productTable.brand, filters.brand))
-    if (filters?.color) conditions.push(ilike(productTable.color, filters.color))
+
+    if (filters?.color) conditions.push(
+        sql`${productTable.color} @> ${JSON.stringify([filters.color])}::jsonb`
+    )
     if (filters?.priceMin != null)
         conditions.push(gte(productTable.price, String(filters.priceMin)))
     if (filters?.priceMax != null)
@@ -572,6 +571,7 @@ export const getAllTargetedProducts = async (
                 id: productTable.id,
                 productName: productTable.productName,
                 imageUrl: productTable.imageUrl,
+                slideImages: productTable.slideImages,
                 description: productTable.description,
                 productTarget: productTable.productTarget,
                 productType: productTable.productType,
@@ -652,6 +652,8 @@ export const getAllTargetedProducts = async (
             reviewCount: r.reviewCount ?? 0,
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
+            color: Array.isArray(r.color) ? (r.color as string[]) : null,
+            slideImages: Array.isArray(r.slideImages) ? (r.slideImages as string[]) : null,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
             variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
@@ -685,7 +687,10 @@ export const getAllProductsType = async (
     ]
 
     if (filters?.brand) conditions.push(eq(productTable.brand, filters.brand))
-    if (filters?.color) conditions.push(ilike(productTable.color, filters.color))
+
+    if (filters?.color) conditions.push(
+        sql`${productTable.color} @> ${JSON.stringify([filters.color])}::jsonb`
+    )
     if (filters?.priceMin != null)
         conditions.push(gte(productTable.price, String(filters.priceMin)))
     if (filters?.priceMax != null)
@@ -697,6 +702,7 @@ export const getAllProductsType = async (
                 id: productTable.id,
                 productName: productTable.productName,
                 imageUrl: productTable.imageUrl,
+                slideImages: productTable.slideImages,
                 description: productTable.description,
                 productTarget: productTable.productTarget,
                 productType: productTable.productType,
@@ -775,6 +781,8 @@ export const getAllProductsType = async (
             reviewCount: r.reviewCount ?? 0,
             stock: r.stock ?? 0,
             isActive: r.isActive ?? true,
+            color: Array.isArray(r.color) ? (r.color as string[]) : null,
+            slideImages: Array.isArray(r.slideImages) ? (r.slideImages as string[]) : null,
             relatedProducts: (r.relatedProducts as string[] | null) ?? [],
             variants: (r.variants as Record<string, string[]> | null) ?? null,
             dealCoupon: r.dealCoupon ?? null,
@@ -792,6 +800,7 @@ export const getProductById = async (id: string): Promise<ProductWithDeal | null
                 id: productTable.id,
                 productName: productTable.productName,
                 imageUrl: productTable.imageUrl,
+                slideImages: productTable.slideImages,
                 description: productTable.description,
                 productTarget: productTable.productTarget,
                 productType: productTable.productType,
@@ -823,7 +832,8 @@ export const getProductById = async (id: string): Promise<ProductWithDeal | null
         db
             .select()
             .from(productSizes)
-            .where(eq(productSizes.productId, id)),
+            .where(eq(productSizes.productId, id))
+            .orderBy(productSizes.createdAt),   // consistent size order
     ])
 
     if (!rows.length) return null
@@ -838,6 +848,8 @@ export const getProductById = async (id: string): Promise<ProductWithDeal | null
         reviewCount: r.reviewCount ?? 0,
         stock: r.stock ?? 0,
         isActive: r.isActive ?? true,
+        color: Array.isArray(r.color) ? (r.color as string[]) : null,
+        slideImages: Array.isArray(r.slideImages) ? (r.slideImages as string[]) : null,
         relatedProducts: (r.relatedProducts as string[] | null) ?? [],
         variants: (r.variants as Record<string, string[]> | null) ?? null,
         brand: r.brand ?? null,
