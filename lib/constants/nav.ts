@@ -2,9 +2,9 @@
 export const PRODUCT_TARGETS = ['men', 'women', 'kids', 'sport'] as const
 
 export const CATEGORIES_BY_TARGET: Record<string, string[]> = {
-  men:   ['Clothing', 'Shoes', 'Brand'],
+  men: ['Clothing', 'Shoes', 'Brand'],
   women: ['Clothing', 'Shoes', 'Brand'],
-  kids:  ['Clothing', 'Shoes', 'Kids By Age', 'Brand'],
+  kids: ['Clothing', 'Shoes', 'Kids By Age', 'Brand'],
   sport: ['Running', 'Football', 'Training & Gym'],
 }
 
@@ -20,7 +20,7 @@ export const PRODUCT_TYPES_BY_CATEGORY: Record<string, string[]> = {
     'Teens (13 to 17 years)', 'Older Kids (7 to 12 years)',
     'Younger Kids (3 to 7 years)', 'Baby & Toddler (0 to 3 years)',
   ],
-  Running:          ['All Running', 'Shoes', 'Clothing', 'Accessories'],
-  Football:         ['All Football', 'Shoes', 'Clothing', 'Accessories'],
+  Running: ['All Running', 'Shoes', 'Clothing', 'Accessories'],
+  Football: ['All Football', 'Shoes', 'Clothing', 'Accessories'],
   'Training & Gym': ['All Training & Gym', 'Shoes', 'Clothing', 'Accessories'],
 }
